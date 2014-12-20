@@ -1,0 +1,4 @@
+nasm		the netwide assembler			http://www.nasm.us
+yoqTempl	micro templating engine			-
+yoqXpand	quasi hex binary encoder		-
+generator	older encoder for lua strings	-
