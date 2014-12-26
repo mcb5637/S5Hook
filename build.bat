@@ -14,3 +14,4 @@ set /p STAGE2=<output/S5Hook.yx
 copy /y "src\S5Hook.lua" "output\S5Hook.lua" >nul
 utils\yoqTempl "output\S5Hook.lua"
 del output\S5Hook.yx
+pause
