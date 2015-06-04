@@ -38,6 +38,13 @@
 			S5Hook.GetWidgetSize(widget)                                Gets the size of the widget
 																		- return1: width
 																		- return2: height
+	MusicFix: allows Music.Start() to use the internal file system
+            S5Hook.PatchMusicFix()                                      Activate
+            S5Hook.UnpatchMusicFix()                                    Deactivate
+                                                                         - ex: crickets as background music on full volume in an endless loop
+                                                                               S5Hook.PatchMusicFix()
+                                                                               Music.Start("sounds/ambientsounds/crickets_rnd_1.wav", 127, true)
+                                                                             
                             
     RuntimeStore: key/value store for strings across maps 
 			S5Hook.RuntimeStore(string key, string value)               - ex: S5Hook.RuntimeStore("addedS5X", "yes")

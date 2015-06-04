@@ -56,6 +56,7 @@ installer:
 		popad
 		retn
 		
+%include 'funcs/musicfix.inc'
 %include 'funcs/osi.inc'
 %include 'funcs/runtimeStore.inc'
 %include 'funcs/changeString.inc'
