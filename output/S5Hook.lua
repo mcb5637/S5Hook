@@ -1,4 +1,4 @@
---[[   //  S5Hook  //  by yoq  // v0.6
+--[[   //  S5Hook  //  by yoq  // v0.7
 
 			S5Hook.AddArchive(string path [, bool precedence])          Add a bba/s5x archive to the internal filesystem
                                                                           - if precedence is true all files will be loaded from it if they are inside
