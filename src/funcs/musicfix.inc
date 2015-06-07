@@ -2,24 +2,43 @@ section luaTable
 		tableEntry patchMusicFix,		    "PatchMusicFix"
 		tableEntry unpatchMusicFix,	    "UnpatchMusicFix"
 
+section globalVars
+closeStreamOrig		dd 0
 
 section cleanup
 		call unpatchMusicFix
 
+AILCloseStream      equ 7614A4h     ; stream
+AILSetUserData      equ 761514h     ; stream, idx, value
+AILGetUserData      equ 761520h     ; stream, idx
+
 section code
 unpatchMusicFix:
-
+        mov eax, [closeStreamOrig]
+        test eax, eax
+        jz .fail
+        
+        mov dword [AILCloseStream], eax
+        mov dword [closeStreamOrig], 0
 		; 8B F0 85 F6 74 76
 
 		mov dword [ifpJump], 0F685F08Bh
 		mov word [ifpJump+4], 7674h
-
+		
+.fail:
 		xor eax, eax
 		retn
 		
 		
 patchMusicFix:
 
+        cmp dword [closeStreamOrig], 0
+        jnz .fail
+        
+        mov eax, [AILCloseStream]
+        mov [closeStreamOrig], eax
+        mov dword [AILCloseStream], closeStreamWrapper
+        
         ; E9 XX XX XX  XX 90
 
 		mov eax, ifpJump
@@ -27,7 +46,8 @@ patchMusicFix:
 		inc eax
 		mov dword [eax], ifpOffset		; relative addr of call target
 		mov byte [eax+4], 90h           ; nop
-
+		
+.fail:
 		xor eax, eax
 		retn
 
@@ -80,22 +100,43 @@ internalFsPatch:
 		mov eax, [859F0Ch]
 		push dword [eax+0Ch]    ; this
 		call [761488h]          ; AIL_open_stream@12
+		mov esi, eax            ; hstream
 		
-		cmp dword [ebp+4], -1   ; is the handle invalid?, (-1)
+		test esi, esi           ; check the AIL hstream
 		jz .failCloseHandle
 		
+		push dword [ebp+4]
+		push 2
+		push esi
+		call [AILSetUserData]
+		
 		add esp, 300
-		mov [esp+4], eax        ; write the STREAM into the right slot 
+		mov [esp+4], esi        ; write the STREAM into the right slot 
                                 ; so it ends up in esi after popad
 		popad
 		jmp ifpRetOK			; original function
 		
 .failCloseHandle:
         push eax
-        call 54E9ECh            ; close handle
+        call 54E9ECh            ; close fs handle
         pop eax
         
 .failOut:
         add esp, 300
         popad
         jmp ifpRetFail
+
+
+closeStreamWrapper:             ; wrapper for _AIL_close_stream(hstream)
+        push 2
+        push dword [esp+8]      ; hstream
+        call [AILGetUserData]
+        test eax, eax
+        jz .continueToOrig
+        
+        push eax
+        call 54E9ECh            ; close fs handle
+        pop eax
+        
+.continueToOrig:
+        jmp dword [closeStreamOrig]

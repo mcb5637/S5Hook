@@ -1,4 +1,4 @@
---[[   //  S5Hook  //  by yoq  // v0.7
+--[[   //  S5Hook  //  by yoq  // v0.8
 
 			S5Hook.AddArchive(string path [, bool precedence])          Add a bba/s5x archive to the internal filesystem
                                                                           - if precedence is true all files will be loaded from it if they are inside
@@ -136,8 +136,10 @@ function InstallHookNextTick()
     local sv67 = Logic.GetEntityScriptingValue(hook_eID, 67)
     if sv67 < 10000 then return; end
     
-	local stage1 = { 3821797831, 6946934, 3050050024, 3661406719, 3229941921, 74080885, 2097256, 26624, 6815745, 4280418304, 1980792853, 1745119744, 4096, 16777320, 26624, 369041920, 7737472, 1433714821, 2715476072, 1749051904, 4165632, 1074790504, 1477836544, 2231399952, 4282021056, 1980924949, 3757089536, 96927905, 10607164, 1, 4283630186, 1980943381, 147096320, 1895772415, 146834180, 26704, 1508385280, 2214574659, 4283960516, 312016 }
+	local stage1 = { 3821797831, 6946934, 3050050024, 3661406719, 3229941921, 2926063733, 1778426330, 2952816704, 6815844, 4278206480, 1980782613, 1958774016, 2216034106, 2734716434, 10608624, 3661366727, 65697, 40501248, 3423993683, 2197845522, 822020292, 2198106367, 1750075584, 10616832, 3124988904, 214205439, 3268476760, 3435921412 }
 	local cc = '@@S5Hook.yx@@'
+	
+	for i = 1, 37 do Mouse.CursorSet(i); end
     local o, n, max = {}, 1, string.len(cc)
 	while n <= max do
 		local b = string.byte(cc, n)

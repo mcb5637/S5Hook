@@ -3,9 +3,7 @@ fakeJmpTable	equ	0A1DA38h
 hookAllocdFlag	equ	0A1DA3Ch
 rtState			equ 0A1DFF0h
 loaderBase		equ	0A1DA40h
-hookBase		equ	22000000h
-hookAllocSize	equ 10000h
-
+hookBase		equ	0A20000h
 
 retToAfterSV	equ 592736h
 					; Funcs     ; Args, push order ->
