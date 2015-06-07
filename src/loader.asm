@@ -9,7 +9,7 @@ loader:
 		push 0
 		call 57A65Eh			 ; call original DestroyEntity()
 		
-		mov eax, [hookAllocdFlag]
+		mov eax, [hookRsrcFlag]
 		test eax, eax
 		jnz .copyPayload
 		
@@ -27,7 +27,7 @@ loader:
 		call [lua_open]
 		mov [rtState], eax
 		
-		mov dword [hookAllocdFlag], 1
+		mov dword [hookRsrcFlag], 1
 
 .copyPayload:	
 		

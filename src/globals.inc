@@ -2,6 +2,7 @@
 fakeJmpTable	equ	0A1DA38h
 hookAllocdFlag	equ	0A1DA3Ch
 rtState			equ 0A1DFF0h
+hookRsrcFlag	equ	0A1DFF4h
 loaderBase		equ	0A1DA40h
 hookBase		equ	0A20000h
 
