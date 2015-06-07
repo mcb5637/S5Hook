@@ -9,3 +9,9 @@ You also need to load the [BigNum](http://oss.digirati.com.br/luabignum/bn/) lib
 ### Building
 Simply execute the `build.bat` to build the source code into a ready-to-use Lua script.
 Well almost, if you make changes to the loader, you have to add these changes manually into the Lua file using the ``utils/generator.exe`` application.
+
+### Download
+Get the latest version of:
+ - [S5Hook](https://bitbucket.org/dbeinder/s5hook/raw/tip/output/S5Hook.lua)
+ - [BigNum](https://bitbucket.org/dbeinder/s5hook/raw/tip/utils/BigNum.lua)
+Download with Alt+Click!
