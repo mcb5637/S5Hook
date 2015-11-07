@@ -72,6 +72,7 @@ installer:
 %include 'funcs/motivation.inc'
 %include 'funcs/reloadConfig.inc'
 %include 'funcs/widget.inc'
+%include 'funcs/projectile.inc'
 
 	
 leaveJump 	equ	40AA1Fh

@@ -1,43 +1,63 @@
---[[   //  S5Hook  //  by yoq  // v0.8
+--[[   //  S5Hook  //  by yoq  // v0.9
 
-			S5Hook.AddArchive(string path [, bool precedence])			Add a bba/s5x archive to the internal filesystem
-																		 - if precedence is true all files will be loaded from it if they are inside
-																		 
-			S5Hook.Log(string textToLog)								Writes the string textToLog into the Settlers5 logfile
-																		 - In MyDocuments/DIE SIEDLER - DEdK/Temp/Logs/Game/XXXX.log
-			
-			S5Hook.ChangeString(string identifier, string newString)	Changes the string with the given identifier to newString
-																		 - ex: S5Hook.ChangeString("names/pu_serf", "Minion")  --change pu_serf from names.xml
+    S5Hook.AddArchive(string path [, bool precedence])			Add a bba/s5x archive to the internal filesystem
+                                                                 - if precedence is true all files will be loaded from it if they are inside
+                                                                 
+    S5Hook.Log(string textToLog)								Writes the string textToLog into the Settlers5 logfile
+                                                                 - In MyDocuments/DIE SIEDLER - DEdK/Temp/Logs/Game/XXXX.log
+    
+    S5Hook.ChangeString(string identifier, string newString)	Changes the string with the given identifier to newString
+                                                                 - ex: S5Hook.ChangeString("names/pu_serf", "Minion")  --change pu_serf from names.xml
 
-			S5Hook.ReloadCutscenes()									Reload the cutscenes in a usermap after a savegame load.
-																		 - call AFTER AddArchive()
-			
-			S5Hook.LoadGUI(string pathToXML)							Load a GUI definition from a .xml file.
-																		 - call after AddArchive() for files inside the s5x archive
-																		 - Completely replaces the old GUI --> Make sure all callbacks exist in the Lua script
-																		 - Do NOT call this function in a GUI callback (button, chatinput, etc...)
-																		 
-			S5Hook.Eval(string luaCode)									Parses luaCode and returns a function, can be used to build a internal debugger
-																		 - ex: myFunc = S5Hook.Eval("Message('Hello world')")
-																			   myFunc()
-																			   
-			S5Hook.ReloadEntities()										Reloads all entity definitions, not the entities list -> only modifications are possible
-																		 - In general: DO NOT USE, this can easily crash the game and requires extensive testing to get it right
-																		 - Requires the map to be added with precedence
-																		 - Only affects new entities -> reload map / reload savegame
-																		 - To keep savegames working, it is only possible to make entities more complex (behaviour, props..)
-																		   do not try to remove props/behaviours (ex: remove darios hawk), this breaks simple savegame loading
-			
-			S5Hook.SetSettlerMotivation(eID, motivation)				Set the motivation for a single settler (and only settlers, crashes otherwise ;)
-																		 - motivation 1 = 100%, 0.2 = 20% settlers leaves
-																		 
-			S5Hook.GetWidgetPosition(widget)							Gets the widget position relative to its parent
-																		- return1: X
-																		- return2: Y
-																		
-			S5Hook.GetWidgetSize(widget)								Gets the size of the widget
-																		- return1: width
-																		- return2: height
+    S5Hook.ReloadCutscenes()									Reload the cutscenes in a usermap after a savegame load.
+                                                                 - call AFTER AddArchive()
+    
+    S5Hook.LoadGUI(string pathToXML)							Load a GUI definition from a .xml file.
+                                                                 - call after AddArchive() for files inside the s5x archive
+                                                                 - Completely replaces the old GUI --> Make sure all callbacks exist in the Lua script
+                                                                 - Do NOT call this function in a GUI callback (button, chatinput, etc...)
+                                                                 
+    S5Hook.Eval(string luaCode)									Parses luaCode and returns a function, can be used to build a internal debugger
+                                                                 - ex: myFunc = S5Hook.Eval("Message('Hello world')")
+                                                                       myFunc()
+                                                                       
+    S5Hook.ReloadEntities()										Reloads all entity definitions, not the entities list -> only modifications are possible
+                                                                 - In general: DO NOT USE, this can easily crash the game and requires extensive testing to get it right
+                                                                 - Requires the map to be added with precedence
+                                                                 - Only affects new entities -> reload map / reload savegame
+                                                                 - To keep savegames working, it is only possible to make entities more complex (behaviour, props..)
+                                                                   do not try to remove props/behaviours (ex: remove darios hawk), this breaks simple savegame loading
+    
+    S5Hook.SetSettlerMotivation(eID, motivation)				Set the motivation for a single settler (and only settlers, crashes otherwise ;)
+                                                                 - motivation 1 = 100%, 0.2 = 20% settlers leaves
+                                                                 
+    S5Hook.GetWidgetPosition(widget)							Gets the widget position relative to its parent
+                                                                - return1: X
+                                                                - return2: Y
+                                                                
+    S5Hook.GetWidgetSize(widget)								Gets the size of the widget
+                                                                - return1: width
+                                                                - return2: height
+
+    S5Hook.CreateProjectile(									Creates a projectile effect, returns an effectID, which can be used with Logic.DestroyEffect()
+                            int effectType,			-- from the GGL_Effects table
+                            float startX, 
+                            float startY, 
+                            float targetX, 
+                            float targetY 
+                            int damage = 0,			-- optional, neccessary to do damage
+                            float radius = -1,		-- optional, neccessary for area hit
+                            int targetId = 0,		-- optional, neccessary for single hit
+                            int attackerId = 0)		-- optional, used for events & allies when doing area hits
+                            
+                                                                Single-Hit Projectiles:
+                                                                    FXArrow, FXCrossBowArrow, FXCavalryArrow, FXCrossBowCavalryArrow, FXBulletRifleman, FXYukiShuriken, FXKalaArrow
+
+                                                                Area-Hit Projectiles:
+                                                                    FXCannonBall, FXCannonTowerBall, FXBalistaTowerArrow, FXCannonBallShrapnel, FXShotRifleman
+                            
+
+      
 	MusicFix: allows Music.Start() to use the internal file system
 			S5Hook.PatchMusicFix()										Activate
 			S5Hook.UnpatchMusicFix()									Deactivate
