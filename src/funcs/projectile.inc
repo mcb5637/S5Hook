@@ -1,5 +1,9 @@
 section luaTable
 		tableEntry createProjectile,		"CreateProjectile"
+		tableEntry isValidEffect,           "IsValidEffect"
+
+section globalVars
+fakeArrowVT 		dd 0
 
 section code
 
@@ -25,16 +29,20 @@ struc ProjDef
                     resd 3
     .size:
 endstruc
-;S5Hook.CreateProjectile(12, 3500,4000,3200,2900, 1000, -1, 65541, 131078)
+
+
+
+;ex: S5Hook.CreateProjectile(12, 3500,4000,3200,2900, 10, -1, 65541, 131078, function Message(42); end)
 ;S5Hook.CreateProjectile(   1   int effectType, 
                         ;   2   float startX,
                         ;   3   float startY, 
                         ;   4   float targetX, 
                         ;   5   float targetY 
-                        ;   6   [, int damage=0 
-                        ;   7   [, float radius=-1 
-                        ;   8   [, int targetId 
-                        ;   9   [, int attackerId]]]])
+                        ;   6   [, int damage = 0 
+                        ;   7   [, float radius = -1 
+                        ;   8   [, int targetId = 0
+                        ;   9   [, int attackerId = 0
+                        ;   10  [, fn hitCallback]]]])
 
               
 createProjectile:
@@ -126,12 +134,36 @@ createProjectile:
         mov dword eax, [ecx]
         
         call [eax+05Ch]
+        push eax                    ;effectID
         
-        push eax
-        fild dword [esp]
+        sub esi, 2                  ; if all 10 params, esi becomes 0, no sign
+        js .noCb
+        
+        mov esi, [esp-24h]          ;esi = &effectObj
+        
+        push LUA_REGISTRYINDEX
+		push ebx
+		call [luaL_ref]
+		mov [esi+58h], eax          ; effectObj+58 = playerID (unused for projectiles)
+		add esp, 8
+		
+		mov eax, [fakeArrowVT]
+		test eax, eax
+		jnz .vtExists
+		
+		call createFakeArrowEffectVtable
+		mov dword [fakeArrowVT], eax
+		
+.vtExists:
+		mov [esi], eax
+        
+        
+.noCb:
+
+        fild dword [esp]            ;effectID
         call luaPushFloat
         pop eax
-		
+
 		add esp, ProjDef.size
 		popad
 		mov eax, 1
@@ -144,3 +176,87 @@ createProjectile:
         call [lua_tonumber]
         add esp, 8
         retn 4
+
+
+createFakeArrowEffectVtable:
+        push esi
+        
+        push 4*12
+        call malloc
+        pop edi
+        mov edi, eax
+        mov esi, 0778E24h
+        mov ecx, 4*12
+        rep movsb
+        
+        mov dword [eax+24h], arrowHitCallback
+        pop esi
+        retn
+
+arrowHitCallback:
+        pushad
+        
+		mov ebx, [luaHandle]
+		
+		push dword [ecx+58h]
+		push LUA_REGISTRYINDEX
+		push ebx
+		call [lua_rawgeti]
+		call [luaL_unref]
+		
+		push 0					; no err func
+		push 1					; 1 return value
+		push 0					; no args
+		push ebx
+		call [lua_pcall]
+		
+		push -1
+		push ebx
+		call [lua_toboolean]    ; returns true to cancel attack
+		mov esi, eax
+		
+		push 0
+		push ebx
+		call [lua_settop]
+		
+		add esp, 11*4
+		
+		test esi, esi
+		jnz .stopAttack
+		
+        popad
+        call 511336h
+        retn
+        
+.stopAttack:
+        popad
+        
+        mov eax, [ecx]
+        push 1
+        call [eax]              ; call destructor on CFlyingEffect
+        retn
+        
+        
+; bool S5Hook.IsValidEffect(int effectID)
+isValidEffect:
+        pushad
+        mov ebx, [esp + 24h]
+        
+        push 1
+		push ebx
+		call shok_lua_toint
+		
+		push eax                        ; effectID
+		mov dword ecx, [0898144h]       ;EffectManager instance
+		call 04FAABDh                   ;bool Mgr::EffectExists(eID)
+        
+        movzx eax, al
+        push eax
+        push ebx
+        call [lua_pushboolean]
+        
+        add esp, 2*4
+        
+        popad
+        mov eax, 1
+        retn

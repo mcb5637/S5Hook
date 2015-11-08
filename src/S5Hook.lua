@@ -1,4 +1,4 @@
---[[   //  S5Hook  //  by yoq  // v0.9
+--[[   //  S5Hook  //  by yoq  // v0.10
 
     S5Hook.AddArchive(string path [, bool precedence])			Add a bba/s5x archive to the internal filesystem
                                                                  - if precedence is true all files will be loaded from it if they are inside
@@ -38,6 +38,8 @@
     S5Hook.GetWidgetSize(widget)								Gets the size of the widget
                                                                 - return1: width
                                                                 - return2: height
+                                                                
+    S5Hook.IsEffectValid(effectID)								Checks whether this effectID is a valid effect, returns a bool
 
     S5Hook.CreateProjectile(									Creates a projectile effect, returns an effectID, which can be used with Logic.DestroyEffect()
                             int effectType,			-- from the GGL_Effects table
@@ -48,7 +50,8 @@
                             int damage = 0,			-- optional, neccessary to do damage
                             float radius = -1,		-- optional, neccessary for area hit
                             int targetId = 0,		-- optional, neccessary for single hit
-                            int attackerId = 0)		-- optional, used for events & allies when doing area hits
+                            int attackerId = 0,		-- optional, used for events & allies when doing area hits
+                            fn hitCallback)         -- optional, fires once the projectile reaches the target, return true to cancel damage events
                             
                                                                 Single-Hit Projectiles:
                                                                     FXArrow, FXCrossBowArrow, FXCavalryArrow, FXCrossBowCavalryArrow, FXBulletRifleman, FXYukiShuriken, FXKalaArrow
