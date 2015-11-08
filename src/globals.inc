@@ -17,6 +17,7 @@ memcpy 			equ	5C1E30h		; num bytes, source, dest
 strlen			equ	5C1DA0h		; str, after call len in eax
 strdup			equ 5D8983h
 malloc			equ 5C4181h		; cdecl size on stack, ptr in eax
+free            equ 5C2E2Dh
 
 
 ; "global" vars

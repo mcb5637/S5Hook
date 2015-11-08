@@ -2,9 +2,6 @@ section luaTable
 		tableEntry createProjectile,		"CreateProjectile"
 		tableEntry isValidEffect,           "IsValidEffect"
 
-section globalVars
-fakeArrowVT 		dd 0
-
 section code
 
 struc ProjDef
@@ -32,7 +29,7 @@ endstruc
 
 
 
-;ex: S5Hook.CreateProjectile(12, 3500,4000,3200,2900, 10, -1, 65541, 131078, function Message(42); end)
+;ex: S5Hook.CreateProjectile(12, 3500,4000,3200,2900, 10, -1, 65541, 131078, function() Message(42); end)
 ;S5Hook.CreateProjectile(   1   int effectType, 
                         ;   2   float startX,
                         ;   3   float startY, 
@@ -147,14 +144,8 @@ createProjectile:
 		mov [esi+58h], eax          ; effectObj+58 = playerID (unused for projectiles)
 		add esp, 8
 		
-		mov eax, [fakeArrowVT]
-		test eax, eax
-		jnz .vtExists
-		
-		call createFakeArrowEffectVtable
-		mov dword [fakeArrowVT], eax
-		
-.vtExists:
+		push dword [esi]                    ;orig vtable location
+		call createFakeEffectVtable
 		mov [esi], eax
         
         
@@ -178,25 +169,27 @@ createProjectile:
         retn 4
 
 
-createFakeArrowEffectVtable:
+createFakeEffectVtable:
         push esi
+        mov esi, [esp+8]            ;orig vtable
         
         push 4*12
         call malloc
         pop edi
+        mov [eax+4*11], esi
         mov edi, eax
-        mov esi, 0778E24h
-        mov ecx, 4*12
+        mov ecx, 4*11
         rep movsb
         
         mov dword [eax+24h], arrowHitCallback
         pop esi
-        retn
+        retn 4
 
 arrowHitCallback:
         pushad
         
 		mov ebx, [luaHandle]
+		push ecx                ; effect obj
 		
 		push dword [ecx+58h]
 		push LUA_REGISTRYINDEX
@@ -221,12 +214,22 @@ arrowHitCallback:
 		
 		add esp, 11*4
 		
+        ;cleanup
+        pop ecx                 ; effect obj
+        mov eax, [ecx]          ; fake vtable
+        mov edi, [eax+11*4]     ; 12th element = orig vtable
+        mov [ecx], edi
+        
+        push eax                ; free fake vtable
+        call free
+        pop eax
+        
 		test esi, esi
 		jnz .stopAttack
 		
         popad
-        call 511336h
-        retn
+        mov eax, [ecx]
+        jmp [eax + 24h]        ; original virtual hit method
         
 .stopAttack:
         popad
