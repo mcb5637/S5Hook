@@ -1,4 +1,4 @@
---[[   //  S5Hook  //  by yoq  // v0.10
+--[[   //  S5Hook  //  by yoq  // v1.0
 
     S5Hook.AddArchive(string path [, bool precedence])			Add a bba/s5x archive to the internal filesystem
                                                                  - if precedence is true all files will be loaded from it if they are inside
@@ -39,7 +39,7 @@
                                                                 - return1: width
                                                                 - return2: height
                                                                 
-    S5Hook.IsEffectValid(effectID)								Checks whether this effectID is a valid effect, returns a bool
+    S5Hook.IsValidEffect(effectID)								Checks whether this effectID is a valid effect, returns a bool
 
     S5Hook.CreateProjectile(									Creates a projectile effect, returns an effectID, which can be used with Logic.DestroyEffect()
                             int effectType,			-- from the GGL_Effects table
@@ -132,75 +132,50 @@
 			end
 		end														
 	
-	Set up with InstallHook(_cb), this needs to be called again after loading a savegame.
-	S5Hook becomes available after a few ticks!
+	Set up with InstallS5Hook(), this needs to be called again after loading a savegame.
 	S5Hook only works with the newest patch version of Settlers5, 1.06!
+	S5Hook is available immediately, but check the return value, in case the player has a old patchversion.
 ]]
 
-function InstallHook(installedCallback)
-    if nil == string.find(Framework.GetProgramVersion(), "1.06.0217") then
-        Message("Error: S5Hook requires version patch 1.06!")
-        return
-    end
-    
-    if not BigNum then
-        Message("Error: S5Hook requires the BigNum library!")
-        return
-    end
-    
-    hook_icb = installedCallback
-    hook_eID = Logic.CreateEntity(Entities.CU_Sheep, 1, 1, 0, 1)
-    hook_loaded = false
-    StartSimpleHiResJob("InstallHookNextTick")
+function InstallHook(installedCallback) -- for compatability with v0.10 or older 
+    if InstallS5Hook() then installedCallback() end
 end
 
-function InstallHookNextTick()
-    if hook_loaded then return true; end
-    local sv67 = Logic.GetEntityScriptingValue(hook_eID, 67)
-    if sv67 < 10000 then return; end
+
+function InstallS5Hook()
+    if nil == string.find(Framework.GetProgramVersion(), "1.06.0217") then
+        Message("Error: S5Hook requires version patch 1.06!")
+        return false
+    end
     
-    local stage1 = { 3821797831, 6946934, 3050050024, 3757351423, 3229941921, 2926063733, 1778426330, 2952816704, 6815844, 4278206480, 1980782613, 1958774016, 2216034106, 2734716434, 10608624, 3757311431, 65697, 40501248, 3423993683, 2197845522, 822020292, 2198106367, 1750075584, 10616832, 3124988904, 214205439, 3268476760, 3435921412 }
-    local cc = '@@S5Hook.yx@@'
-    
-    Mouse.CursorHide()
+	local loader     = "@@loader.yx@@"
+	local S5HookData = "@@S5Hook.yx@@"
+	
+	local shrink = function(cc)
+	 local o, n, max = {}, 1, string.len(cc)
+		while n <= max do
+			local b = string.byte(cc, n)
+			if b >= 97 then b=16*(b-97)+string.byte(cc, n+1)-97; n=n+2; else b=b-65; n=n+1; end
+			table.insert(o, string.char(b))
+		end
+		return table.concat(o)
+	end
+	
+	Mouse.CursorHide()
     for i = 1, 37 do Mouse.CursorSet(i); end
     Mouse.CursorSet(10)
     Mouse.CursorShow() 
-    local o, n, max = {}, 1, string.len(cc)
-    while n <= max do
-        local b = string.byte(cc, n)
-        if b >= 97 then b=16*(b-97)+string.byte(cc, n+1)-97; n=n+2; else b=b-65; n=n+1; end
-        table.insert(o, string.char(b))
-    end
-    local stage2 = table.concat(o)
-    local SV67bn = BigNum.new("-" .. sv67)
-    local asSV = BigNum.new()
-    local rest = BigNum.new()
-    BigNum.div(SV67bn, BigNum.new("4"), asSV, rest)
-    local ZO = BigNum.new()
-    BigNum.sub(asSV, BigNum.new("58"), ZO)
-
-    local loadBase = BigNum.new()
-    BigNum.add(ZO, BigNum.new("2651792"), loadBase)
-    for i = 1, table.getn(stage1) do
-        local wordAddr = BigNum.new()
-        BigNum.add(loadBase, BigNum.new(i-1), wordAddr)
-        Logic.SetEntityScriptingValue(hook_eID, tonumber(BigNum.mt.tostring(wordAddr)), stage1[i])
-    end
-
-    local ftable = BigNum.new()
-    BigNum.add(ZO, BigNum.new("2651790"), ftable) 
-    Logic.SetEntityScriptingValue(hook_eID, tonumber(BigNum.mt.tostring(ftable)), 10607168)
-    Logic.SetEntityScriptingValue(hook_eID, -58, 10607144)
-    Logic.DestroyEntity(hook_eID, stage2)
-    if S5Hook then
-        S5Hook.Log("S5Hook loaded!")
-        hook_loaded = true                -- safeguard if hook_icb() throws an error
-        if hook_icb then
-            hook_icb()
-        end
-    else
-        Message("Loading S5Hook failed!")
-    end
-    return true
+	
+	local pwCache, pwKey = {}, "Config\\UbiCom\\Password"
+	for i = 0, 49 do table.insert(pwCache, GDB.GetValue(pwKey .. i)); end
+	
+	local eID = Logic.CreateEntity(Entities.CU_Sheep, 1, 1, 0, 1)
+	XNetworkUbiCom.User_SetPassword(shrink(loader))
+	Logic.SetEntityScriptingValue(eID, -58, 5912424)
+	Logic.DestroyEntity(eID, shrink(S5HookData))
+	
+	for i = 0, 49 do GDB.SetValueNoSave(pwKey .. i, pwCache[i+1]); end
+	GDB.Save();
+	
+	return S5Hook ~= nil
 end
