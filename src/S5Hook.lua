@@ -1,6 +1,6 @@
 --[[   //  S5Hook  //  by yoq  // v1.1
 
-    S5Hook.AddArchive(string path [, bool precedence])            Add a bba/s5x archive to the internal filesystem
+    S5Hook.AddArchive(string path [, bool precedence])          Add a bba/s5x archive to the internal filesystem
                                                                  - if precedence is true all files will be loaded from it if they are inside
                                                                  
     S5Hook.Log(string textToLog)                                Writes the string textToLog into the Settlers5 logfile
@@ -42,15 +42,15 @@
     S5Hook.IsValidEffect(effectID)                                Checks whether this effectID is a valid effect, returns a bool
 
     S5Hook.CreateProjectile(                                    Creates a projectile effect, returns an effectID, which can be used with Logic.DestroyEffect()
-                            int effectType,            -- from the GGL_Effects table
+                            int effectType,         -- from the GGL_Effects table
                             float startX, 
                             float startY, 
                             float targetX, 
                             float targetY 
-                            int damage = 0,            -- optional, neccessary to do damage
-                            float radius = -1,        -- optional, neccessary for area hit
-                            int targetId = 0,        -- optional, neccessary for single hit
-                            int attackerId = 0,        -- optional, used for events & allies when doing area hits
+                            int damage = 0,         -- optional, neccessary to do damage
+                            float radius = -1,      -- optional, neccessary for area hit
+                            int targetId = 0,       -- optional, neccessary for single hit
+                            int attackerId = 0,     -- optional, used for events & allies when doing area hits
                             fn hitCallback)         -- optional, fires once the projectile reaches the target, return true to cancel damage events
                             
                                                                 Single-Hit Projectiles:
@@ -62,7 +62,7 @@
 
       
     MusicFix: allows Music.Start() to use the internal file system
-            S5Hook.PatchMusicFix()                                        Activate
+            S5Hook.PatchMusicFix()                                      Activate
             S5Hook.UnpatchMusicFix()                                    Deactivate
                                                                          - ex: crickets as background music on full volume in an endless loop
                                                                                S5Hook.PatchMusicFix()
@@ -102,18 +102,18 @@
                                                                          - Images have to be reloaded after a savegame load
                                                                          - ex: imgObj = S5Hook.OSILoadImage("graphics\\textures\\gui\\onscreen_emotion_good")
 
-            S5Hook.OSIGetImageSize(imgObj)                                Returns sizeX and sizeY of the given image
+            S5Hook.OSIGetImageSize(imgObj)                              Returns sizeX and sizeY of the given image
                                                                          - ex: sizeX, sizeY = S5Hook.OSIGetImageSize(imgObj)
 
-            S5Hook.OSISetDrawTrigger(func callbackFn)                    callbackFn(eID, bool active, posX, posY) will be called EVERY frame for every 
+            S5Hook.OSISetDrawTrigger(func callbackFn)                   callbackFn(eID, bool active, posX, posY) will be called EVERY frame for every 
                                                                            currently visible entity with overhead display, the active parameter become true
                                                                            
-            S5Hook.OSIRemoveDrawTrigger()                                Stop delivering events
+            S5Hook.OSIRemoveDrawTrigger()                               Stop delivering events
 
         Only call from the DrawTrigger callback:
-            S5Hook.OSIDrawImage(imgObj, posX, posY, sizeX, sizeY)        Draw the image on the screen. Stretching is allowed.
+            S5Hook.OSIDrawImage(imgObj, posX, posY, sizeX, sizeY)       Draw the image on the screen. Stretching is allowed.
             
-            S5Hook.OSIDrawText(text, font, posX, posY, r, g, b, a)        Draw the string on the screen. Valid values for font range from 1-10.
+            S5Hook.OSIDrawText(text, font, posX, posY, r, g, b, a)      Draw the string on the screen. Valid values for font range from 1-10.
                                                                         The color is specified by the r,g,b,a values (0-255).
                                                                         a = 255 is maximum visibility
                                                                         Standard S5 modifiers are allowed inside text (@center, etc...)
@@ -153,7 +153,7 @@ function InstallS5Hook()
     local S5HookData = "@@S5Hook.yx@@"
     
     local shrink = function(cc)
-     local o, n, max = {}, 1, string.len(cc)
+        local o, n, max = {}, 1, string.len(cc)
         while n <= max do
             local b = string.byte(cc, n)
             if b >= 97 then b=16*(b-97)+string.byte(cc, n+1)-97; n=n+2; else b=b-65; n=n+1; end
