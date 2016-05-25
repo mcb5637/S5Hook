@@ -1,4 +1,4 @@
---[[   //  S5Hook  //  by yoq  // v1.0
+--[[   //  S5Hook  //  by yoq  // v1.1
 
     S5Hook.AddArchive(string path [, bool precedence])			Add a bba/s5x archive to the internal filesystem
                                                                  - if precedence is true all files will be loaded from it if they are inside
@@ -148,7 +148,8 @@ function InstallS5Hook()
         return false
     end
     
-	local loader     = "@@loader.yx@@"
+	local stage0     = "@@stage0.yx@@"
+	local stage1     = "@@stage1.yx@@"
 	local S5HookData = "@@S5Hook.yx@@"
 	
 	local shrink = function(cc)
@@ -166,16 +167,16 @@ function InstallS5Hook()
     Mouse.CursorSet(10)
     Mouse.CursorShow() 
 	
-	local pwCache, pwKey = {}, "Config\\UbiCom\\Password"
-	for i = 0, 49 do table.insert(pwCache, GDB.GetValue(pwKey .. i)); end
+	local csPath = "Config\\User\\Callsign"
+	local callSign = GDB.GetString(csPath)
+	GDB.SetStringNoSave(csPath, shrink(stage0))
 	
-	local eID = Logic.CreateEntity(Entities.CU_Sheep, 1, 1, 0, 1)
-	XNetworkUbiCom.User_SetPassword(shrink(loader))
-	Logic.SetEntityScriptingValue(eID, -58, 5912424)
-	Logic.DestroyEntity(eID, shrink(S5HookData))
+	local eID = Logic.CreateEntity(Entities.XD_Plant1, 0, 0, 0, 0)
+	XNetwork.Manager_GetLocalMachineUserName()
+	Logic.SetEntityScriptingValue(eID, -58, 4582799)
+	Logic.DestroyEntity(eID, shrink(stage1), shrink(S5HookData))
 	
-	for i = 0, 49 do GDB.SetValueNoSave(pwKey .. i, pwCache[i+1]); end
-	GDB.Save();
+	GDB.SetStringNoSave(csPath, callSign)
 	
 	return S5Hook ~= nil
 end
