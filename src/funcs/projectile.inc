@@ -1,6 +1,6 @@
 section luaTable
-		tableEntry createProjectile,		"CreateProjectile"
-		tableEntry isValidEffect,           "IsValidEffect"
+        tableEntry createProjectile,        "CreateProjectile"
+        tableEntry isValidEffect,           "IsValidEffect"
 
 section code
 
@@ -67,51 +67,51 @@ createProjectile:
         call .getLuaFloat
         push 2
         call .getLuaFloat
-		push 3
+        push 3
         call .getLuaFloat
-		push 4
+        push 4
         call .getLuaFloat
-		push 5
+        push 5
         call .getLuaFloat
-		
-		fstp dword [ebp + ProjDef.targetY]
-		fstp dword [ebp + ProjDef.targetX]
-		fst dword [ebp + ProjDef.startY]
-		fstp dword [ebp + ProjDef.startYcopy]
-		fst dword [ebp + ProjDef.startX]
-		fstp dword [ebp + ProjDef.startXcopy]
-		fistp dword [ebp + ProjDef.effectType]
-		
-		sub esi, 5
-		jz .noDamage
-		
-		push 6
+        
+        fstp dword [ebp + ProjDef.targetY]
+        fstp dword [ebp + ProjDef.targetX]
+        fst dword [ebp + ProjDef.startY]
+        fstp dword [ebp + ProjDef.startYcopy]
+        fst dword [ebp + ProjDef.startX]
+        fstp dword [ebp + ProjDef.startXcopy]
+        fistp dword [ebp + ProjDef.effectType]
+        
+        sub esi, 5
+        jz .noDamage
+        
+        push 6
         call .getLuaFloat
-		fistp dword [ebp + ProjDef.damage]
-		
-		dec esi
-		jz .noRadius
-		
-		push 7
+        fistp dword [ebp + ProjDef.damage]
+        
+        dec esi
+        jz .noRadius
+        
+        push 7
         call .getLuaFloat
-		fstp dword [ebp + ProjDef.radius]
-		
-		dec esi
-		jz .noTargetId
-		
-		push 8
+        fstp dword [ebp + ProjDef.radius]
+        
+        dec esi
+        jz .noTargetId
+        
+        push 8
         call .getLuaFloat
-		fistp dword [ebp + ProjDef.targetID]
-		
-		dec esi
-		jz .noAttackerId
-		
-		push 9
+        fistp dword [ebp + ProjDef.targetID]
+        
+        dec esi
+        jz .noAttackerId
+        
+        push 9
         call .getLuaFloat
-		fistp dword [ebp + ProjDef.attackerID]
-		
-		jmp .setupDone
-		
+        fistp dword [ebp + ProjDef.attackerID]
+        
+        jmp .setupDone
+        
 .noDamage:
         ;mov dword [ebp + ProjDef.damage], 0        ;already nulled
 
@@ -139,14 +139,14 @@ createProjectile:
         mov esi, [esp-24h]          ;esi = &effectObj
         
         push LUA_REGISTRYINDEX
-		push ebx
-		call [luaL_ref]
-		mov [esi+58h], eax          ; effectObj+58 = playerID (unused for projectiles)
-		add esp, 8
-		
-		push dword [esi]                    ;orig vtable location
-		call createFakeEffectVtable
-		mov [esi], eax
+        push ebx
+        call [luaL_ref]
+        mov [esi+58h], eax          ; effectObj+58 = playerID (unused for projectiles)
+        add esp, 8
+        
+        push dword [esi]                    ;orig vtable location
+        call createFakeEffectVtable
+        mov [esi], eax
         
         
 .noCb:
@@ -155,12 +155,12 @@ createProjectile:
         call luaPushFloat
         pop eax
 
-		add esp, ProjDef.size
-		popad
-		mov eax, 1
-		retn
-		
-		
+        add esp, ProjDef.size
+        popad
+        mov eax, 1
+        retn
+        
+        
 .getLuaFloat:
         push dword [esp+4]
         push ebx
@@ -188,32 +188,32 @@ createFakeEffectVtable:
 arrowHitCallback:
         pushad
         
-		mov ebx, [luaHandle]
-		push ecx                ; effect obj
-		
-		push dword [ecx+58h]
-		push LUA_REGISTRYINDEX
-		push ebx
-		call [lua_rawgeti]
-		call [luaL_unref]
-		
-		push 0					; no err func
-		push 1					; 1 return value
-		push 0					; no args
-		push ebx
-		call [lua_pcall]
-		
-		push -1
-		push ebx
-		call [lua_toboolean]    ; returns true to cancel attack
-		mov esi, eax
-		
-		push 0
-		push ebx
-		call [lua_settop]
-		
-		add esp, 11*4
-		
+        mov ebx, [luaHandle]
+        push ecx                ; effect obj
+        
+        push dword [ecx+58h]
+        push LUA_REGISTRYINDEX
+        push ebx
+        call [lua_rawgeti]
+        call [luaL_unref]
+        
+        push 0                  ; no err func
+        push 1                  ; 1 return value
+        push 0                  ; no args
+        push ebx
+        call [lua_pcall]
+        
+        push -1
+        push ebx
+        call [lua_toboolean]    ; returns true to cancel attack
+        mov esi, eax
+        
+        push 0
+        push ebx
+        call [lua_settop]
+        
+        add esp, 11*4
+        
         ;cleanup
         pop ecx                 ; effect obj
         mov eax, [ecx]          ; fake vtable
@@ -224,9 +224,9 @@ arrowHitCallback:
         call free
         pop eax
         
-		test esi, esi
-		jnz .stopAttack
-		
+        test esi, esi
+        jnz .stopAttack
+        
         popad
         mov eax, [ecx]
         jmp [eax + 24h]        ; original virtual hit method
@@ -246,12 +246,12 @@ isValidEffect:
         mov ebx, [esp + 24h]
         
         push 1
-		push ebx
-		call shok_lua_toint
-		
-		push eax                        ; effectID
-		mov dword ecx, [0898144h]       ;EffectManager instance
-		call 04FAABDh                   ;bool Mgr::EffectExists(eID)
+        push ebx
+        call shok_lua_toint
+        
+        push eax                        ; effectID
+        mov dword ecx, [0898144h]       ;EffectManager instance
+        call 04FAABDh                   ;bool Mgr::EffectExists(eID)
         
         movzx eax, al
         push eax
