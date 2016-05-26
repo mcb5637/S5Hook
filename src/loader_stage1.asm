@@ -10,12 +10,9 @@ stage1:
         test al, al
         jnz .copyPayload
         
-        
-        ; cache cursor ?    
-        push eax                ; dummy
-        
                                 ; get write permissions for .text, .data, and .rsrc
                                 
+        push eax                ; dummy
         push esp                ; ptr store old permissions (dummy)
         push 40h                ; new access: R/W/X
         push 64B000h            ; length
@@ -35,8 +32,8 @@ stage1:
         push 3
         push ebx
         call [lua_tostring]
+        pop ecx                 ; shorter than add esp, 8
         pop ecx
-        pop edi
         
         mov ecx, [eax+4]        ; num bytes
         mov edi, hookBase

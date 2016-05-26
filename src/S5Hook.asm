@@ -6,15 +6,15 @@ shiftedOrigin     equ    hookBase - ( startOfPayload - payloadHeader)
 org shiftedOrigin
 
 
-payloadHeader:                            ; for stage1 loader
+payloadHeader:
 
 entryPoint      dd installer
 copySize        dd payloadSize
 
 startOfPayload equ $
 
-    ; const strings
-section strings align=1
+
+section strings align=1             ; const strings
 sS5Hook         db "S5Hook", 0
 
 section luaTable align=1
@@ -26,8 +26,6 @@ section globalVars align=1
 
 section code align=1
 installer:
-        pushad 
-        
         mov esi, luaFuncTable
         
 .nextEntry:
@@ -53,7 +51,6 @@ installer:
         mov byte [eax], 0E9h                ; opcode jmp
         mov dword [eax+1], loadOffset       ; relative jmp target
         
-        popad
         retn
         
 %include 'funcs/musicfix.inc'
