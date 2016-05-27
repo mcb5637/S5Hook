@@ -26,21 +26,11 @@ section globalVars align=1
 
 section code align=1
 installer:
-        mov esi, luaFuncTable
+        push dword sS5Hook
+        push dword luaFuncTable
+        call registerFuncTable
         
-.nextEntry:
-        push 0                          ; no description
-        push dword [esi]                ; func ptr
-        add esi, 5
-        push esi                        ; func name (string)
-        movzx eax, byte [esi-1]         ; skip over func name
-        add esi, eax
-        push sS5Hook                    ; base table
-        push ebx                        ; lua handle
-        call regLuaFunc
-        
-        cmp dword [esi], 0
-        jnz .nextEntry
+        call startupSetup
         
         ; patch functions to unload s5hook
         mov eax, leaveJump                  ; create jump at this location 
@@ -52,7 +42,9 @@ installer:
         mov dword [eax+1], loadOffset       ; relative jmp target
         
         retn
-        
+
+
+%include 'funcs/globalFuncs.inc'
 %include 'funcs/musicfix.inc'
 %include 'funcs/osi.inc'
 %include 'funcs/runtimeStore.inc'
@@ -70,7 +62,9 @@ installer:
 %include 'funcs/reloadConfig.inc'
 %include 'funcs/widget.inc'
 %include 'funcs/projectile.inc'
-
+%include 'funcs/terrain.inc'
+%include 'funcs/imports.inc'
+%include 'funcs/memory.inc'
     
 leaveJump     equ    40AA1Fh
 leaveOffset equ leaveGameHook - (leaveJump + 5)
@@ -104,6 +98,10 @@ triggerInt3:
 
 unpatchEverything:
 section cleanup align=1
+        retn
+        
+startupSetup:
+section autorun align=1
         retn
 
 payloadSize equ $ - hookBase

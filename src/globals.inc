@@ -24,6 +24,9 @@ free            equ 5C2E2Dh
 luaHandle       equ 853A9Ch ;ptr
 
                     ;Imports (ptr to funcs)
+GetProcAddress  equ 7611D8h
+GetModuleHandleA equ 7610D8h
+
 lua_open        equ 761284h
 lua_gettop      equ 7612BCh
 lua_settop      equ 7612B0h
@@ -47,12 +50,25 @@ luaL_unref      equ 76123Ch
 luaL_ref        equ 761234h
 luaL_loadbuffer equ 7612A4h
 
-shok_lua_toint  equ 59BD81h
+shok_lua_toint      equ 59BD81h
+shok_lua_tonumber   equ 59BD99h
+shok_lua_tostring   equ 59BDACh
+shok_lua_tobool     equ 59BDD2h
+shok_lua_touserdata equ 59BDBFh
+shok_lua_pushint    equ 59BDEBh
+shok_lua_pushbool   equ 59BE30h
+shok_lua_pushstring equ 59BE1Dh
+
 shok_eid2obj    equ 5825B4h
 
 virtualAlloc    equ 761080h
 virtualQuery    equ 761128h
 virtualProtect  equ 761058h     ; lpdwOldProtection, dwNewProtection, dwStart, dwLen
+
+ ; manual imports (imports.inc)
+lua_setmetatable equ 0A1DB00h
+lua_newuserdata  equ 0A1DB04h
+luaL_error       equ 0A1DB08h
 
     ; constants
 LUA_REGISTRYINDEX   equ (-10000)
