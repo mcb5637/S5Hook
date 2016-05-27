@@ -100,7 +100,7 @@
 
     MemoryAccess: Direct access to game objects
             S5Hook.GetEntityMem(int eID)                                Gets the address of a entity object
-            val = obj[n]                                                Dereferences obj and returns a new address *obj+4n
+            val = obj[n]                                                Dereferences obj and returns a new address: *obj+4n
             val:GetInt(), val:GetFloat(), val:GetString()               Returns the value at the address
             val:SetInt(int newValue), val:SetFloat(float newValue)      Write the value at the address
                                                                          - ex: eObj = S5Hook.GetEntityMem(65537)
@@ -196,9 +196,4 @@ function InstallS5Hook()
     GDB.SetStringNoSave(csPath, callSign)
     
     return S5Hook ~= nil
-end
-test=function(n)
-    local tb = {n}
-    setmetatable(tb, __mem.mt)
-    return tb
 end
