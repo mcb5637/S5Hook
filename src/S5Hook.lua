@@ -1,4 +1,4 @@
---[[   //  S5Hook  //  by yoq  // v1.2
+--[[   //  S5Hook  //  by yoq  // v1.3
 
     S5Hook.AddArchive(string path [, bool precedence])          Add a bba/s5x archive to the internal filesystem
                                                                  - if precedence is true all files will be loaded from it if they are inside
@@ -100,9 +100,12 @@
 
     MemoryAccess: Direct access to game objects
             S5Hook.GetEntityMem(int eID)                                Gets the address of a entity object
+            S5Hook.GetRawMem(int ptr)                                   Gets a raw pointer
             val = obj[n]                                                Dereferences obj and returns a new address: *obj+4n
+            shifted = obj:Offset(n)                                     Returns a new pointer, shifted by n: obj+4n
             val:GetInt(), val:GetFloat(), val:GetString()               Returns the value at the address
             val:SetInt(int newValue), val:SetFloat(float newValue)      Write the value at the address
+            val:GetByte(offset), val:SetByte(offset, newValue)          Read or Write a single byte relative to val
                                                                          - ex: eObj = S5Hook.GetEntityMem(65537)
                                                                                speedFactor = eObj[31][1][7]:GetFloat()
                                                                                name = eObj[51]:GetString() 

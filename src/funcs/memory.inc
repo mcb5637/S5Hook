@@ -11,12 +11,15 @@ daMetaTableRef      dd 0
 section code
 
 daFuncs:
-        tableEntry daGetInt,            "GetInt"
-        tableEntry daGetFloat,          "GetFloat"
-        tableEntry daSetInt,            "SetInt"
-        tableEntry daSetFloat,          "SetFloat"
-        tableEntry daGetString,         "GetString"
-        tableEntry daCreateRelative,    "cr"
+        tableEntry daGetInt,            "GetInt"        ; GetInt(ud)
+        tableEntry daGetFloat,          "GetFloat"      ; GetFloat(ud)
+        tableEntry daGetByte,           "GetByte"       ; GetByte(offset)
+        tableEntry daSetInt,            "SetInt"        ; SetInt(ud, val)
+        tableEntry daSetFloat,          "SetFloat"      ; SetFloat(ud, val)
+        tableEntry daSetByte,           "SetByte"       ; SetByte(ud, offset, val)
+        tableEntry daGetString,         "GetString"     ; GetString(ud)
+        tableEntry daDerefCreateRel,    "cr"            ; cr(ud, n)           -- new = *old + 4n
+        tableEntry daCreateRelative,    "Offset"        ; Offset(ud, n)       -- new = old + 4n
         dd 0
         
 sMemTbl     db "__mem", 0
@@ -132,7 +135,7 @@ daGetUdArg:
         call [luaL_error] ; doesn't return
        ; retn
 
-daCreateRelative: ;(ud, n)
+daDerefCreateRel: ;(ud, n)
         pushad
         mov ebx, [esp+24h]
         
@@ -147,6 +150,26 @@ daCreateRelative: ;(ud, n)
         lea eax, [esi + 4*eax]
         push eax
         call daCreateUD
+        
+        popad
+        mov eax, 1
+        retn
+
+daCreateRelative: ;(ud, n)
+        pushad
+        mov ebx, [esp+24h]
+        
+        call daGetUdArg
+        mov esi, [eax]
+        mov esi, [esi]      ; deref prev ptr
+        
+        push 2
+        push ebx
+        call shok_lua_toint
+        
+        lea eax, [esi + 4*eax]
+        push eax
+        call daCreateUDHead
         
         popad
         mov eax, 1
@@ -217,6 +240,46 @@ daGetInt:
         mov eax, 1
         retn
 
+daGetByte: ;(ud, off)
+        pushad
+        mov ebx, [esp+24h]
+        
+        call daGetUdArg
+        mov esi, [eax]
+        
+        push 2
+        push ebx
+        call shok_lua_toint
+        
+        movzx eax, byte [eax + esi]
+        push eax
+        push ebx
+        call shok_lua_pushint
+        
+        popad
+        mov eax, 1
+        retn
+
+daSetByte: ;(ud, off, val)
+        pushad
+        mov ebx, [esp+24h]
+        
+        call daGetUdArg
+        mov esi, [eax]
+        
+        push 2
+        push ebx
+        call shok_lua_toint
+        add esi, eax
+        
+        push 3
+        push ebx
+        call shok_lua_toint
+        mov byte [esi], al
+        
+        popad
+        xor eax, eax
+        retn
 
 daGetString:
         pushad
