@@ -1,6 +1,9 @@
 section luaTable
         tableEntry directAccessEntity,  "GetEntityMem"
         tableEntry directAccessPointer, "GetRawMem"
+        tableEntry daReallocMem,        "ReAllocMem"
+        tableEntry daFreeMem,           "FreeMem"
+        tableEntry setHighFPUPrecision, "SetPreciseFPU"
 
 section autorun
         call daSetupFuncs
@@ -294,4 +297,51 @@ daGetString:
         
         popad
         mov eax, 1
+        retn
+        
+setHighFPUPrecision:
+        call 5C8451h
+        xor eax, eax
+        retn
+
+daReallocMem:
+        pushad
+        mov ebx, [esp+24h]
+        
+        push 2
+        push ebx
+        call shok_lua_toint
+        push eax                ; new size
+        
+        push 1
+        push ebx
+        call shok_lua_toint
+        push eax                ; ptr
+        
+        call realloc
+        pop ecx                 ; realloc is cdecl
+        pop ecx
+        
+        push eax
+        push ebx
+        call shok_lua_pushint   ; new ptr
+        
+        popad
+        mov eax, 1
+        retn
+
+daFreeMem:
+        pushad
+        mov ebx, [esp+24h]
+        
+        push 1
+        push ebx
+        call shok_lua_toint
+        push eax                ; ptr
+        
+        call free
+        pop ecx
+        
+        popad
+        xor eax, eax
         retn

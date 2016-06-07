@@ -1,4 +1,4 @@
---[[   //  S5Hook  //  by yoq  // v1.3
+--[[   //  S5Hook  //  by yoq  // v1.4b
 
     S5Hook.AddArchive(string path [, bool precedence])          Add a bba/s5x archive to the internal filesystem
                                                                  - if precedence is true all files will be loaded from it if they are inside
@@ -39,7 +39,11 @@
                                                                 - return1: width
                                                                 - return2: height
                                                                 
-    S5Hook.IsValidEffect(effectID)                                Checks whether this effectID is a valid effect, returns a bool
+    S5Hook.IsValidEffect(effectID)                              Checks whether this effectID is a valid effect, returns a bool
+    
+    S5Hook.SetPreciseFPU()                                      Sets 53Bit precision on the FPU, allows accurate calculation in Lua with numbers exceeding 16Mil,
+                                                                however most calls to engine functions will undo this. Therefore call directly before doing a calculation 
+                                                                in Lua and don't call anything else until you're done.
 
     S5Hook.CreateProjectile(                                    Creates a projectile effect, returns an effectID, which can be used with Logic.DestroyEffect()
                             int effectType,         -- from the GGL_Effects table
@@ -106,6 +110,8 @@
             val:GetInt(), val:GetFloat(), val:GetString()               Returns the value at the address
             val:SetInt(int newValue), val:SetFloat(float newValue)      Write the value at the address
             val:GetByte(offset), val:SetByte(offset, newValue)          Read or Write a single byte relative to val
+            S5Hook.ReAllocMem(ptr, newSize)                             realloc(ptr, newSize), call with ptr==0 to use like malloc()
+            S5Hook.FreeMem(ptr)                                         free(ptr)
                                                                          - ex: eObj = S5Hook.GetEntityMem(65537)
                                                                                speedFactor = eObj[31][1][7]:GetFloat()
                                                                                name = eObj[51]:GetString() 

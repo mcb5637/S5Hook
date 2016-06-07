@@ -16,8 +16,10 @@ strncpy         equ 5C3AD0h     ; num, src, dest
 memcpy          equ 5C1E30h     ; num bytes, source, dest
 strlen          equ 5C1DA0h     ; str, after call len in eax
 strdup          equ 5D8983h
-malloc          equ 5C4181h     ; cdecl size on stack, ptr in eax
-free            equ 5C2E2Dh
+malloc          equ 5C4181h     ; cdecl void *malloc(size)
+realloc         equ 5C4193h     ; cdecl void *realloc(ptr, newSize)
+calloc          equ 5C4340h     ; cdecl void *calloc(size)
+free            equ 5C2E2Dh     ; cdecl void free(ptr)
 
 
 ; "global" vars
