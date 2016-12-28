@@ -34,6 +34,7 @@ lua_gettop      equ 7612BCh
 lua_settop      equ 7612B0h
 lua_type        equ 7612B4h
 lua_dostring    equ 761244h
+lua_pushnil     equ 761270h
 lua_pushstring  equ 76125Ch
 lua_pushnumber  equ 7612C4h
 lua_pushboolean equ 7612A8h

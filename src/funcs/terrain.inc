@@ -81,10 +81,49 @@ getTerrainInfo:
         push ebx
         call shok_lua_pushint
         
+        
+        ; terraintype
+        push esi
+        
+        mov eax, [895DACh] ;GameLogic_Instance_895DAC
+        mov eax, [eax+24h]
+        mov esi, [eax+20h] ;CGLETerrainLowRes
+        
+        mov ecx, 4
+        
+        mov eax, [ebp+8]        ;x (hires)
+        cdq                     ;0-extend to edx
+        idiv ecx                ;x/4 (lores)
+        push eax
+        
+        mov eax, [ebp+12]       ;y (hires)
+        cdq                     ;0-extend to edx
+        idiv ecx                ;y/4 (lores)
+        mov edx, eax
+        
+        inc edx                 ;(y+1)
+        imul edx, [esi+2Ch]     ;(y+1)*len
+        pop eax
+        add edx, eax            ;x+(y+1)*len
+        imul edx, 4
+        
+        mov ecx, [esi+8]        ;base
+        add ecx, 4 
+        add ecx, edx 
+        
+        movzx eax, byte [ecx]
+        push eax
+        push ebx
+        call shok_lua_pushint
+        
+        pop esi
+        ; terraintype end
+        
+        
         add esp, 4*4 
         
         popad
-        mov eax, 3
+        mov eax, 4
         retn
         
 .abort:

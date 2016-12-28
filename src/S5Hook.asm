@@ -16,9 +16,12 @@ startOfPayload equ $
 
 section strings align=1             ; const strings
 sS5Hook         db "S5Hook", 0
+sVERSION        db "Version", 0
+sS5HookVersion  db "1.4", 0
 
 section luaTable align=1
 luaFuncTable:
+                tableEntry unload,             "Unload"
                 tableEntry triggerInt3,        "Break"
                 ; dd 0 ; omit because of cnTableRef ;)
 
@@ -31,6 +34,35 @@ installer:
         call registerFuncTable
         
         call startupSetup
+        
+        ; set S5Hook.Version
+        push sS5Hook
+        push ebx
+        call shok_lua_pushstring
+        
+        push LUA_GLOBALSINDEX
+        push ebx
+        call [lua_rawget]
+        
+        push sVERSION
+        push ebx
+        call shok_lua_pushstring
+        
+        push sS5HookVersion
+        push ebx
+        call shok_lua_pushstring
+        
+        push -3
+        push ebx
+        call [lua_settable]
+        
+        push -2
+        push ebx
+        call [lua_settop]      
+        
+        add esp, 4*6
+        
+        
         
         ; patch functions to unload s5hook
         mov eax, leaveJump                  ; create jump at this location 
@@ -95,6 +127,27 @@ triggerInt3:
         int3
         xor eax, eax
         retn
+        
+unload:
+    pushad
+    call unpatchEverything
+    
+    push sS5Hook
+    push ebx
+    call shok_lua_pushstring
+    
+    push ebx
+    call [lua_pushnil]
+    
+    push LUA_GLOBALSINDEX
+    push ebx
+    call [lua_settable]
+    
+    add esp, 3*4
+    
+    popad
+    xor eax, eax
+    retn
 
 unpatchEverything:
 section cleanup align=1
