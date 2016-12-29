@@ -17,7 +17,7 @@ startOfPayload equ $
 section strings align=1             ; const strings
 sS5Hook         db "S5Hook", 0
 sVERSION        db "Version", 0
-sS5HookVersion  db "1.4", 0
+sS5HookVersion  db "1.5a", 0
 
 section luaTable align=1
 luaFuncTable:
@@ -97,6 +97,7 @@ installer:
 %include 'funcs/terrain.inc'
 %include 'funcs/imports.inc'
 %include 'funcs/memory.inc'
+%include 'funcs/iterator.inc'
     
 leaveJump     equ    40AA1Fh
 leaveOffset equ leaveGameHook - (leaveJump + 5)

@@ -1,6 +1,4 @@
---[[   //  S5Hook  //  by yoq  // v1.4
-    
-    S5Hook.Unload()                                             Unload S5Hook
+--[[   //  S5Hook  //  by yoq  // v1.5a
     
     S5Hook.Version                                              string, the currently loaded version of S5Hook
     

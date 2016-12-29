@@ -34,11 +34,13 @@ lua_gettop      equ 7612BCh
 lua_settop      equ 7612B0h
 lua_type        equ 7612B4h
 lua_dostring    equ 761244h
+lua_pushvalue   equ 76127Ch
 lua_pushnil     equ 761270h
 lua_pushstring  equ 76125Ch
 lua_pushnumber  equ 7612C4h
 lua_pushboolean equ 7612A8h
 lua_pushlightuserdata equ 7612C0h
+lua_pushcclosure equ 761258h
 lua_newtable    equ 761268h
 lua_gettable    equ 7612B8h
 lua_settable    equ 761254h
@@ -76,6 +78,8 @@ luaL_error       equ 0A1DB08h
     ; constants
 LUA_REGISTRYINDEX   equ (-10000)
 LUA_GLOBALSINDEX    equ (-10001)
+
+%define lua_upvalueindex(n) (LUA_GLOBALSINDEX-(n)) 
 
 %macro  tableEntry  2           ; %1 = funcPtr, %2 = string
         dd %1

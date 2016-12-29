@@ -23,3 +23,10 @@ registerFuncTable:
         pop edi
         pop esi
         retn 8
+
+lua_getfloat:
+        push dword [esp+4]
+        push ebx
+        call [lua_tonumber]
+        add esp, 8
+        retn 4
