@@ -1,4 +1,4 @@
---[[   //  S5Hook  //  by yoq  // v1.5a
+--[[   //  S5Hook  //  by yoq  // v1.5b
     
     S5Hook.Version                                              string, the currently loaded version of S5Hook
     
@@ -117,8 +117,26 @@
             S5Hook.FreeMem(ptr)                                         free(ptr)
                                                                          - ex: eObj = S5Hook.GetEntityMem(65537)
                                                                                speedFactor = eObj[31][1][7]:GetFloat()
-                                                                               name = eObj[51]:GetString() 
-
+                                                                               name = eObj[51]:GetString()
+                                                                               
+   EntityIterator: Fast iterator over all entities                      
+            S5Hook.EntityIterator(...)                                  Takes 0 or more Predicate objects, returns an iterator over all matching eIDs
+            S5Hook.EntityIteratorTableize(...)                          Takes 0 or more Predicate objects, returns a table with all matching eIDs
+                Predicate.InCircle(x, y, r)                             Matches entities in the the circle at (x,y) with radius r
+                Predicate.InRect(x0, y0, x1, y1)                        Matches entities with x between x0 and x1, and y between y0 and y1, no need to swap if x0 > x1
+                Predicate.IsBuilding()                                  Matches buildings
+                Predicate.InSector(sectorID)
+                Predicate.OfPlayer(playerID)
+                Predicate.OfType(entityTypeID)
+                Predicate.OfCategory(entityCategoryID)
+                Predicate.OfUpgradeCategory(upgradeCategoryID)
+                                                                        Notes: Use the iterator version if possible, it's usually faster for doing operations on every match.
+                                                                               The Tableize version is just faster if you want to create a table and save it for later.
+                                                                               Place the faster / more unlikely predicates in front for better performance!
+                                                                        ex: Kill all military units of Player 1
+                                                                            for eID in S5Hook.EntityIterator(Predicate.OfPlayer(1), Predicate.OfCategory(EntityCategories.Military)) do
+                                                                                AddHealth(eID, 100);
+                                                                            end
     OnScreenInformation (OSI): 
         Draw additional info near entities into the 3D-View (like healthbar, etc).
         You have to set a trigger function, which will be responsible for drawing 

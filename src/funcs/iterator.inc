@@ -1,5 +1,6 @@
 section luaTable
         tableEntry createEntityIterator,  "EntityIterator"
+        tableEntry entityIterateAll,      "EntityIteratorTableize"
 
 section autorun
         call eiSetup
@@ -8,15 +9,14 @@ section code
 
 eiPredFuncs:
         tableEntry createCirclePredicate,       "InCircle"          ; x, y, r
-;       tableEntry createRectPredicate,         "InRect"            ; x0, y0, x1, y1
+        tableEntry createRectPredicate,         "InRect"            ; x0, y0, x1, y1
         tableEntry createPlayerPredicate,       "OfPlayer"          ; pID
         tableEntry createTypePredicate,         "OfType"            ; eTypeID
         tableEntry createCatPredicate,          "OfCategory"        ; entCatID
         tableEntry createUpCatPredicate,        "OfUpgradeCategory" ; upCatID
         tableEntry createBuildingPredicate,     "IsBuilding"        ; -
         tableEntry createSectorPredicate,       "InSector"          ; sectorID
-;       tableEntry createLuaPredicate,          "Lua"               ; luaFn
-; , resourceProvider, sector
+; ideas: luaFnPredicate, resourceProviderPredicate
         dd 0
         
 sPredTbl    db "Predicate", 0
@@ -66,10 +66,10 @@ createEntityIterator:
         call [lua_pushcclosure] ; (L, fn, Nupvalues)
         add esp, 4*3
         
+        mov [esp+24], esi       ;pass obj back in ecx via popad (!), for IterateAll
         popad
         mov eax, 1
         retn
-
 
 
 entityIterate:          ; internal iterator, arg = my iter obj
@@ -156,8 +156,44 @@ entityIterateLua:
         popad
         xor eax, eax
         retn
+
         
+entityIterateAll: ; Q'n'D
+        pushad
         
+        call createEntityIterator
+        mov esi, ecx                ; hacky calling convention, iter obj
+        mov edi, 1                  ; counter for tbl
+        
+        push ebx
+        call [lua_newtable]
+        add esp, 4
+
+.iterate:
+        push esi
+        call entityIterate
+        test eax, eax
+        jz .done
+        
+        push eax
+        push ebx
+        call shok_lua_pushint
+        
+        push edi    ;n
+        push -2     ;tbl stack pos
+        push ebx
+        call [lua_rawseti]
+        add esp, 4*3
+        
+        inc edi
+        jmp .iterate
+        
+.done:
+        popad
+        mov eax, 1
+        retn
+
+;Predicates        
 createCirclePredicate:
         pushad
         
@@ -187,6 +223,56 @@ createCirclePredicate:
         call 579F9Ah ; thiscall CGLEEntityDistancePredicate_ctor_579F9A(<ecx> this, float centerPosXY[], float r)
         
         add esp, 3*4
+        popad
+        mov eax, 1
+        retn
+
+createRectPredicate:
+        pushad
+        
+        push 1              ;x0     st(3)
+        call lua_getfloat
+        push 3              ;x1     st(2)
+        call lua_getfloat
+        push 2              ;y0     st(1)
+        call lua_getfloat
+        push 4              ;y1     st(0)
+        call lua_getfloat
+        
+        sub esp, 4*4
+        mov ebp, esp
+        
+        ; EBP + 0  X lo
+        ;     + 4  Y lo
+        ;     + 8  X hi
+        ;     +12  Y hi
+        
+        fcomi st0, st1              ; CF = st(0) < st(1)
+        jb .storeY                  ; jmp on CF=1
+        fxch st0, st1
+.storeY:
+        fstp dword [ebp+4]
+        fstp dword [ebp+12]
+        
+        fcomi st0, st1              ; CF = st(0) < st(1)
+        jb .storeX                  ; jmp on CF=1
+        fxch st0, st1
+.storeX:
+        fstp dword [ebp]
+        fstp dword [ebp+8]   
+        
+        push 14h
+        push ebx
+        call [lua_newuserdata]
+        mov ecx, eax
+        add esp, 8
+        
+        push ebp
+        add dword [esp], 8
+        push ebp
+        call 579EF8h ; thiscall CGLEEntityPredicateArea_ctor_579EF8(<ecx> this, float posA[], float posB[])
+        
+        add esp, 4*4
         popad
         mov eax, 1
         retn

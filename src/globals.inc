@@ -46,6 +46,7 @@ lua_gettable    equ 7612B8h
 lua_settable    equ 761254h
 lua_rawget      equ 761280h
 lua_rawgeti     equ 761238h
+lua_rawseti     equ 761264h
 lua_tostring    equ 7612CCh     ; index, luaState
 lua_toboolean   equ 7612ACh
 lua_tonumber    equ 761220h
