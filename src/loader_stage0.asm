@@ -4,7 +4,7 @@ bits 32
 section text
 org loaderBase
 
-;must be null free!
+;must be null free, 100bytes max!
 stage0:         
         pushad
         
