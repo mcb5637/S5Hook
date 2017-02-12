@@ -2,22 +2,17 @@ bits 32
 section payload
 %include 'globals.inc'
 
-shiftedOrigin     equ    hookBase - ( startOfPayload - payloadHeader)
-org shiftedOrigin
+org hookBase
 
-
-payloadHeader:
 
 entryPoint      dd installer
 copySize        dd payloadSize
-
-startOfPayload equ $
 
 
 section strings align=1             ; const strings
 sS5Hook         db "S5Hook", 0
 sVERSION        db "Version", 0
-sS5HookVersion  db "1.5b", 0
+sS5HookVersion  db "2.0a", 0
 
 section luaTable align=1
 luaFuncTable:
@@ -29,6 +24,22 @@ section globalVars align=1
 
 section code align=1
 installer:
+        
+        ; restore SP after ROP loader
+        lea ecx, [esp - 0D4h]           ; eObj
+        mov esp, [ecx + 12]
+        pushad
+        
+        mov al, [hookRsrcFlag]
+        test al, al
+        jnz .rtStateExists
+        call [lua_open]
+        mov [rtState], eax
+        mov byte [hookRsrcFlag], 1
+.rtStateExists:
+    
+        mov ebx, [luaHandle]
+        
         push dword sS5Hook
         push dword luaFuncTable
         call registerFuncTable
@@ -73,7 +84,9 @@ installer:
         mov byte [eax], 0E9h                ; opcode jmp
         mov dword [eax+1], loadOffset       ; relative jmp target
         
-        retn
+        
+        popad
+        retn 4
 
 
 %include 'funcs/globalFuncs.inc'

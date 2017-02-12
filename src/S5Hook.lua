@@ -1,4 +1,4 @@
---[[   //  S5Hook  //  by yoq  // v1.5b
+--[[   //  S5Hook  //  by yoq  // v2.0a
     
     S5Hook.Version                                              string, the currently loaded version of S5Hook
     
@@ -195,16 +195,15 @@ function InstallS5Hook()
     if not __mem then __mem = {}; end
     __mem.__index = function(t, k) return __mem[k] or __mem.cr(t, k); end
     
-    local stage0     = "@@stage0.yx@@"
-    local stage1     = "@@stage1.yx@@"
+    local loader     = { @@stage0.yx@@ }
     local S5HookData = "@@S5Hook.yx@@"
     
     local shrink = function(cc)
-        local o, n, max = {}, 1, string.len(cc)
-        while n <= max do
+        local o, i = {}, 1
+        for n = 1, string.len(cc) do
             local b = string.byte(cc, n)
-            if b >= 97 then b=16*(b-97)+string.byte(cc, n+1)-97; n=n+2; else b=b-65; n=n+1; end
-            table.insert(o, string.char(b))
+            if b >= 97 then n=n+1; b=16*(b-97)+string.byte(cc, n)-97; else b=b-65; end
+            o[i] = string.char(b); i = i + 1
         end
         return table.concat(o)
     end
@@ -214,16 +213,16 @@ function InstallS5Hook()
     Mouse.CursorSet(10)
     Mouse.CursorShow() 
     
-    local csPath = "Config\\User\\Callsign"
-    local callSign = GDB.GetString(csPath)
-    GDB.SetStringNoSave(csPath, shrink(stage0))
-    
     local eID = Logic.CreateEntity(Entities.XD_Plant1, 0, 0, 0, 0)
-    XNetwork.Manager_GetLocalMachineUserName()
-    Logic.SetEntityScriptingValue(eID, -58, 4582799)
-    Logic.DestroyEntity(eID, shrink(stage1), shrink(S5HookData))
-    
-    GDB.SetStringNoSave(csPath, callSign)
+    local d, w, r = {}, Logic.SetEntityScriptingValue, Logic.GetEntityScriptingValue
+    Display.DbgSetDepthBias32(-768, 1.0533988e-38)
+    for o, v in loader do 
+        d[o] = r(eID, -59+o)
+        if v ~= 0 then w(eID, -59+o, v); end
+    end
+    Logic.HeroSetActionPoints(eID, shrink(S5HookData))
+    for o, v in d do w(eID, -59+o, v); end
+    Logic.DestroyEntity(eID)
     
     return S5Hook ~= nil
 end
