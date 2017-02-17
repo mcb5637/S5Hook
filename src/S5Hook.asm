@@ -138,7 +138,7 @@ loadGameHook:                   ; jmp from 40AA76
         jmp 40AA7Bh
         
 triggerInt3:
-        int3
+        int1
         xor eax, eax
         retn
         

@@ -1,0 +1,16 @@
+FileSystemMgr instance at [88F088]
+
+thiscall FileSystemMgr_AddArchiveFile_54E579(char *filename, bool atTop) at [vtbl+18h]
+thiscall FileSystemMgr_UnloadTopMapArchive_54E24B() at [vtbl+28h]
+thiscall FileSystemMgr_MakePathAbsolute_54DE8F(char *absPath, char *relPath) [edx+30h]
+
+List of sources at mgr+4
+
+map s5x, [only during load & FMA]
+extra2\bba\patchex.bba
+extra2\bba\patche2.bba
+extra2\bba\data.bba
+extra2\bba\lang.bba
+extra2\bba\patch.bba
+base\lang.bba
+base\data.bba

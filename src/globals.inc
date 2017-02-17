@@ -16,6 +16,8 @@ strncpy         equ 5C3AD0h     ; num, src, dest
 memcpy          equ 5C1E30h     ; num bytes, source, dest
 strlen          equ 5C1DA0h     ; str, after call len in eax
 strdup          equ 5D8983h
+strstr          equ 5C30E0h     ; cdecl char *strstr(char *str1, char *str2)
+sprintf         equ 5C2D11h     ; cdecl int sprintf(char *buf, char *fmt, ...)
 malloc          equ 5C4181h     ; cdecl void *malloc(size)
 realloc         equ 5C4193h     ; cdecl void *realloc(ptr, newSize)
 calloc          equ 5C4340h     ; cdecl void *calloc(size)

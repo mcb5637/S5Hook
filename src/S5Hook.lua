@@ -1,9 +1,6 @@
---[[   //  S5Hook  //  by yoq  // v2.0a
+--[[   //  S5Hook  //  by yoq  // v2.0
     
     S5Hook.Version                                              string, the currently loaded version of S5Hook
-    
-    S5Hook.AddArchive(string path [, bool precedence])          Add a bba/s5x archive to the internal filesystem
-                                                                 - if precedence is true all files will be loaded from it if they are inside
                                                                  
     S5Hook.Log(string textToLog)                                Writes the string textToLog into the Settlers5 logfile
                                                                  - In MyDocuments/DIE SIEDLER - DEdK/Temp/Logs/Game/XXXX.log
@@ -11,8 +8,7 @@
     S5Hook.ChangeString(string identifier, string newString)    Changes the string with the given identifier to newString
                                                                  - ex: S5Hook.ChangeString("names/pu_serf", "Minion")  --change pu_serf from names.xml
 
-    S5Hook.ReloadCutscenes()                                    Reload the cutscenes in a usermap after a savegame load.
-                                                                 - call AFTER AddArchive()
+    S5Hook.ReloadCutscenes()                                    Reload the cutscenes in a usermap after a savegame load, the map archive must be loaded!
     
     S5Hook.LoadGUI(string pathToXML)                            Load a GUI definition from a .xml file.
                                                                  - call after AddArchive() for files inside the s5x archive
@@ -72,7 +68,15 @@
                                                                  - return3: sector nr
                                                                  - return4: terrain type
 
-      
+    Internal Filesystem: S5 uses an internal filesystem - whenever a file is needed it searches for the file in the first archive from the top, then the one below...
+            | Map File (s5x)      |                             The Map File is only on top of the list during loading / savegame loading, and gets removed after            
+            | extra2\bba\data.bba |                                GameCallback_OnGameStart (FirstMapAction) & Mission_OnSaveGameLoaded (OnSaveGameLoaded)
+            | base\data.bba       |                             ( <= the list is longer than 3 entries, only for illustration)
+            
+            S5Hook.AddArchive([string filename])                Add a archive to the top of the filesystem, no argument needed to load current s5x
+            S5Hook.RemoveArchive()                              Removes the top-most entry from the filesystem
+                                                                 - ex: S5Hook.AddArchive(); S5Hook.LoadGUI("maps/externalmap/mygui.xml"); S5Hook.RemoveArchive()
+            
     MusicFix: allows Music.Start() to use the internal file system
             S5Hook.PatchMusicFix()                                      Activate
             S5Hook.UnpatchMusicFix()                                    Deactivate
@@ -133,7 +137,7 @@
                                                                         Notes: Use the iterator version if possible, it's usually faster for doing operations on every match.
                                                                                The Tableize version is just faster if you want to create a table and save it for later.
                                                                                Place the faster / more unlikely predicates in front for better performance!
-                                                                        ex: Kill all military units of Player 1
+                                                                        ex: Heal all military units of Player 1
                                                                             for eID in S5Hook.EntityIterator(Predicate.OfPlayer(1), Predicate.OfCategory(EntityCategories.Military)) do
                                                                                 AddHealth(eID, 100);
                                                                             end
