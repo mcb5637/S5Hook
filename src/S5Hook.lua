@@ -1,4 +1,4 @@
---[[   //  S5Hook  //  by yoq  // v2.0
+--[[   //  S5Hook  //  by yoq  // v2.1a
     
     S5Hook.Version                                              string, the currently loaded version of S5Hook
                                                                  
@@ -228,5 +228,15 @@ function InstallS5Hook()
     for o, v in d do w(eID, -59+o, v); end
     Logic.DestroyEntity(eID)
     
-    return S5Hook ~= nil
+    if S5Hook ~= nil then 
+        S5HookEventSetup();
+        return true;
+    end
+end
+
+function S5HookEventSetup()
+    PostEvent = {}
+    function PostEvent.SerfExtractResource(eID, resourceType, posX, posY)   __event.xr(eID, resourceType, posX, posY); end
+    function PostEvent.SerfConstructBuilding(serf_eID, building_eID)        __event.e2(69655, serf_eID, building_eID); end
+    function PostEvent.SerfRepairBuilding(serf_eID, building_eID)           __event.e2(69656, serf_eID, building_eID); end
 end
