@@ -219,12 +219,11 @@ function InstallS5Hook()
     
     local eID = Logic.CreateEntity(Entities.XD_Plant1, 0, 0, 0, 0)
     local d, w, r = {}, Logic.SetEntityScriptingValue, Logic.GetEntityScriptingValue
-    Display.DbgSetDepthBias32(-768, 1.0533988e-38)
     for o, v in loader do 
         d[o] = r(eID, -59+o)
         if v ~= 0 then w(eID, -59+o, v); end
     end
-    Logic.HeroSetActionPoints(eID, shrink(S5HookData))
+    Logic.HeroSetActionPoints(eID, 7517305, shrink(S5HookData))
     for o, v in d do w(eID, -59+o, v); end
     Logic.DestroyEntity(eID)
     

@@ -12,7 +12,7 @@ copySize        dd payloadSize
 section strings align=1             ; const strings
 sS5Hook         db "S5Hook", 0
 sVERSION        db "Version", 0
-sS5HookVersion  db "2.1a", 0
+sS5HookVersion  db "2.1b", 0
 
 section luaTable align=1
 luaFuncTable:
@@ -27,7 +27,8 @@ installer:
         
         ; restore SP after ROP loader
         lea ecx, [esp - 0D4h]           ; eObj
-        mov esp, [ecx + 12]
+        mov esp, [ecx + 12]             ; restore esp from xchg
+        add esp, 3*4                    ; undo "push, push, call esi"
         pushad
         
         mov al, [hookRsrcFlag]
