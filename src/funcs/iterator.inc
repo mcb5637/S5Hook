@@ -16,6 +16,9 @@ eiPredFuncs:
         tableEntry createUpCatPredicate,        "OfUpgradeCategory" ; upCatID
         tableEntry createBuildingPredicate,     "IsBuilding"        ; -
         tableEntry createSectorPredicate,       "InSector"          ; sectorID
+		tableEntry createPlayerNotZeroPredicate,"NotOfPlayer0"
+		tableEntry createMultiPlayerPredicate,	"MultiPlayer"
+		tableEntry createMultiEtypPredicate,	"MultiETyp"
 ; ideas: luaFnPredicate, resourceProviderPredicate
         dd 0
         
@@ -391,3 +394,177 @@ createSectorPredicate:
         popad
         mov eax, 1
         retn
+
+createPlayerNotZeroPredicate:
+		pushad
+        
+        push 8
+        push ebx
+        call [lua_newuserdata]
+        mov esi, eax
+        add esp, 8
+        
+        mov [esi], esi									; pointer to own adress -> object is own vtable
+		
+		mov [esi+4], dword playerNotZeroPredicateFunc	; func at +4
+        
+        popad
+        mov eax, 1
+        retn
+
+playerNotZeroPredicateFunc:		; ecx -> arg0 this (not used)
+		pushad
+		
+		mov ebx, [esp+24h] ; arg1 -> pointer to entity object
+		
+		mov ecx, [ebx+18h] ; load player
+		
+		cmp ecx, 0 ; check zero
+		jne .rtrue
+		
+		
+		popad
+		mov eax, 0
+		retn 4
+		
+.rtrue:
+		popad
+		mov eax, 1
+		retn 4
+
+createMultiPlayerPredicate:
+		pushad
+        
+        push 44
+        push ebx
+        call [lua_newuserdata]
+        mov esi, eax
+        add esp, 8
+        
+        mov [esi], esi									; pointer to own adress -> object is own vtable
+		
+		mov [esi+4], dword multiPlayerPredicateFunc	; func at +4
+        
+		push 1											; player 0
+		push ebx
+		call shok_lua_toint
+		mov [esi+8], eax
+		
+		push 2											; player 1
+		push ebx
+		call shok_lua_toint
+		mov [esi+12], eax
+		
+		push 3											; player 2
+		push ebx
+		call shok_lua_toint
+		mov [esi+16], eax
+		
+		push 4											; player 3
+		push ebx
+		call shok_lua_toint
+		mov [esi+20], eax
+		
+		push 5											; player 4
+		push ebx
+		call shok_lua_toint
+		mov [esi+24], eax
+		
+		push 6											; player 5
+		push ebx
+		call shok_lua_toint
+		mov [esi+28], eax
+		
+		push 7											; player 6
+		push ebx
+		call shok_lua_toint
+		mov [esi+32], eax
+		
+		push 8											; player 7
+		push ebx
+		call shok_lua_toint
+		mov [esi+36], eax
+		
+		push 9											; player 8
+		push ebx
+		call shok_lua_toint
+		mov [esi+40], eax
+		
+		
+        popad
+        mov eax, 1
+        retn
+
+multiPlayerPredicateFunc:		; ecx -> arg0 this
+		pushad
+		
+		mov ebx, [esp+24h] ; arg1 -> pointer to entity object
+		
+		mov edx, [ebx+18h] ; load player
+		
+		imul edx, edx, 4	;load flag
+		mov edx, [ecx+8+edx]
+		
+		cmp edx, 0 ; check zero
+		jne .rtrue
+		
+		
+		popad
+		mov eax, 0
+		retn 4
+		
+.rtrue:
+		popad
+		mov eax, 1
+		retn 4
+
+createMultiEtypPredicate:
+		pushad
+        
+        push 12
+        push ebx
+        call [lua_newuserdata]
+        mov esi, eax
+        add esp, 8
+        
+        mov [esi], esi									; pointer to own adress -> object is own vtable
+		
+		mov [esi+4], dword multiEtypPredicateFunc	; func at +4
+        
+		push 1											; etyp table
+		push ebx
+		call shok_lua_toint
+		mov [esi+8], eax
+		
+		
+        popad
+        mov eax, 1
+        retn
+
+multiEtypPredicateFunc:		; ecx -> arg0 this
+		pushad
+		
+		mov ebx, [esp+24h] ; arg1 -> pointer to entity object
+		
+		mov edx, [ebx+10h] ; load etyp
+		
+		mov ecx, [ecx+8]	; load etyp table
+		
+		imul edx, edx, 4	;load flag
+		mov edx, [ecx+edx]
+		
+		cmp edx, 0 ; check zero
+		jne .rtrue
+		
+		
+		popad
+		mov eax, 0
+		retn 4
+		
+.rtrue:
+		popad
+		mov eax, 1
+		retn 4
+
+
+
