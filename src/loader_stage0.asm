@@ -8,19 +8,20 @@ org 0
 ; copied onto eObj, 0's are ignored
 ; full restore using lua
 
-; dword write to fixed address (A19F70h) by Logic.DbgSetDepthBias32(,X as float) 
 ; vtable modification, by Logic.SetEntityScriptingValue(-58, vtable)
-; execution by Logic.HeroSetActionPoints(eID, extra_payload):
-; 1 arg, stdcall, obj in eax: call [vtable+40], edi and esi are caller saved!
+; execution by Logic.HeroSetActionPoints(eID, val_for_esi, extra_payload)
+; results in call [vtable+40], edi and esi are caller saved!
+; 2 args, thiscall, this: CEventValue obj, eax: entity obj ptr, esi: 2nd arg
 
 stage0:         
-        dd 0A19F30h         ; vtable, allows random exec by Logic.DbgSetDepthBias32(,X), X
-    ;; X = 72B479h          ; xchg eax, esp ; pop edi ; test dword ptr [eax], eax ; ret
+        dd 402100h          ; fake vtable, HeroSetActionPoints @ [vt+40]
+;;[vt+40]: 4020E6h          ; push, push, call esi
+;;    esi: 72B479h          ; xchg eax, esp ; pop edi ; test dword ptr [eax], eax ; ret
         dd 40FCB5h          ; add esp, 4 ; ret
         dd 0            ;D eID, do not overwrite!
         dd 58A6CFh          ; push eax ; pop eax ; ret 4
-        dd 4215E5h          ; add esp, 0x50 ; ret                   ; space for VirtualProtect
-        times 54h db 0                                              ; and other calls
+        dd 6281CEh          ; add esp, 0x100 ; ret                  ; space for VirtualProtect
+        times 104h db 0                                             ; and other calls
         
         dd 40142Bh          ; pop eax ; ret
         dd virtualProtect
@@ -41,7 +42,7 @@ stage0:
         
         dd 637B4Ch          ; xchg eax, ecx ; ret                       ; ecx = base
         dd 0            ;D dummy, gets overwritten with L <ecx>
-        dd 2            ;D lua tostring, arg2
+        dd 3            ;D lua tostring, arg2 = 3
         
         dd 402480h          ; mov eax, dword ptr [ecx + 4] ; ret        ; eax = size, ecx = base
         dd 5C3F82h          ; pop edx ; ret                             ; edx = memcpy
