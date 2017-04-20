@@ -19,6 +19,7 @@ eiPredFuncs:
 		tableEntry createPlayerNotZeroPredicate,"NotOfPlayer0"
 		tableEntry createMultiPlayerPredicate,	"MultiPlayer"
 		tableEntry createMultiEtypPredicate,	"MultiETyp"
+		tableEntry createRProviderPredicate,	"ResourceProvider"	; resourceType (raw)
 ; ideas: luaFnPredicate, resourceProviderPredicate
         dd 0
         
@@ -375,6 +376,26 @@ createUpCatPredicate:
         retn
         
         
+createRProviderPredicate:
+        pushad
+        
+        push 8
+        push ebx
+        call [lua_newuserdata]
+        mov esi, eax
+        add esp, 8
+        
+        mov [esi], dword 76FF44h    ;CResourceProviderPredicate
+        
+        push 1
+        push ebx
+        call shok_lua_toint
+        mov [esi+4], eax            ; resource type
+        
+        popad
+        mov eax, 1
+        retn
+     
 createSectorPredicate:
         pushad
         
