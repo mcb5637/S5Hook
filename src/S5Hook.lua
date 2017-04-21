@@ -134,6 +134,10 @@
                 Predicate.OfType(entityTypeID)
                 Predicate.OfCategory(entityCategoryID)
                 Predicate.OfUpgradeCategory(upgradeCategoryID)
+				Predicate.NotOfPlayer0()								Matches everything that has another player than 0
+				Predicate.MultiPlayer(player1, player2, ...)			Matches entities of one of the specified players
+				Predicate.MultiEType(etyp1, etyp2, ...)					Matches entities of one of the specified entity types
+				Predicate.ProvidesResource(resourceType)				Matches entities, where serfs can extract the specified resource. Use ResourceType.XXXRaw
                                                                         Notes: Use the iterator version if possible, it's usually faster for doing operations on every match.
                                                                                The Tableize version is just faster if you want to create a table and save it for later.
                                                                                Place the faster / more unlikely predicates in front for better performance!
