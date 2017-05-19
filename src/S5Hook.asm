@@ -12,7 +12,7 @@ copySize        dd payloadSize
 section strings align=1             ; const strings
 sS5Hook         db "S5Hook", 0
 sVERSION        db "Version", 0
-sS5HookVersion  db "2.1b", 0
+sS5HookVersion  db "2.1c", 0
 
 section luaTable align=1
 luaFuncTable:
