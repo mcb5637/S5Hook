@@ -26,7 +26,12 @@ luaPushFloat:
         retn
 
 getWidgetPosition:
+        pushad
+        mov ebx, [esp+24h]
+        
         call getWidgetObject
+        test eax, eax
+        jz widgetNotFound
 
         fld dword [eax+18h]   ;y pos
         fld dword [eax+14h]   ;x pos
@@ -34,11 +39,17 @@ getWidgetPosition:
         call luaPushFloat
         call luaPushFloat
         
+        popad
         mov eax, 2
         retn
         
 getWidgetSize:
+        pushad
+        mov ebx, [esp+24h]
+        
         call getWidgetObject
+        test eax, eax
+        jz widgetNotFound
 
         fld dword [eax+20h]   ;y size
         fld dword [eax+1Ch]   ;x size
@@ -46,5 +57,11 @@ getWidgetSize:
         call luaPushFloat
         call luaPushFloat
         
+        popad
         mov eax, 2
+        retn
+
+widgetNotFound:
+        popad
+        xor eax, eax
         retn

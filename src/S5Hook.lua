@@ -1,4 +1,4 @@
---[[   //  S5Hook  //  by yoq  // v2.1a
+--[[   //  S5Hook  //  by yoq  // v2.1c
     
     S5Hook.Version                                              string, the currently loaded version of S5Hook
                                                                  
