@@ -6,11 +6,11 @@ section code
 eventFuncs:
         tableEntry eventExtractResource,    "xr"
         tableEntry event2Entities,          "e2"
-		tableEntry eventEntityPos,			"ep"
-		tableEntry eventEntity,				"e"
-		tableEntry eventEntityPlayer,		"epl"
-		tableEntry eventEntityInt,			"ei"
-		tableEntry eventCannonPlacer,		"cp"
+        tableEntry eventEntityPos,          "ep"
+        tableEntry eventEntity,             "e"
+        tableEntry eventEntityPlayer,       "epl"
+        tableEntry eventEntityInt,          "ei"
+        tableEntry eventCannonPlacer,       "cp"
         dd 0
         
 sEventTbl     db "__event", 0
@@ -251,15 +251,15 @@ eventCannonPlacer:                     ; cp(eId, bottom, top, px, py)
         call lua_getfloat
         fstp dword [ebp+20]     ; x
         mov eax, [ebp+20]
-		mov [ebp+32], eax
+        mov [ebp+32], eax
         
         push 5
         call lua_getfloat
         fstp dword [ebp+24]     ; y
         mov eax, [ebp+24]
-		mov [ebp+36], eax
-		
-		mov dword [ebp+28], 0
+        mov [ebp+36], eax
+        
+        mov dword [ebp+28], 0
         
         push ebp
         call 525D77h
