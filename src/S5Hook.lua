@@ -259,5 +259,6 @@ function S5HookEventSetup()
 	function PostEvent.BuySerf(buildingId)									__event.epl(69636, GetPlayer(buildingId), buildingId); end
 	function PostEvent.SellBuilding(buildingId)								__event.epl(69638, GetPlayer(buildingId), buildingId); end
 	function PostEvent.FoundryConstructCannon(buildingId, entityType)		__event.ei(69684, buildingId, entityType); end
+	function PostEvent.HeroPlaceCannonAbility(heroId, bottomType, topType, posX, posY)	__event.cp(heroId, bottomType, topType, posX, posY); end
 	
 end
