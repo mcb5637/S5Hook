@@ -1,7 +1,10 @@
 section luaTable
         tableEntry getWidgetPosition,       "GetWidgetPosition"
         tableEntry getWidgetSize,           "GetWidgetSize"
-
+        
+section autorun
+        call widgetPatchSetPAS
+        
 section code
 getWidgetObject:
         push 1
@@ -64,4 +67,25 @@ getWidgetSize:
 widgetNotFound:
         popad
         xor eax, eax
+        retn
+
+widgetPatchOneLoadFn:
+        add dword [eax+1], (59BD99h-59BD81h)
+        mov word [eax+5], 04EBh
+        retn
+        
+widgetPatchSetPAS:
+        mov eax, 5617A7h
+        cmp byte [eax+5], 0EBh
+        je .done
+        
+        call widgetPatchOneLoadFn
+        add eax, (5617B8h - 5617A7h)
+        call widgetPatchOneLoadFn
+        add eax, (5617C9h - 5617B8h)
+        call widgetPatchOneLoadFn
+        add eax, (5617DAh - 5617C9h)
+        call widgetPatchOneLoadFn
+        mov word [eax+11], 0F685h           ;test esi, esi
+.done:
         retn
