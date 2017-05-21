@@ -17,10 +17,10 @@ eiPredFuncs:
         tableEntry createBuildingPredicate,     "IsBuilding"        ; -
         tableEntry createSectorPredicate,       "InSector"          ; sectorID
 		tableEntry createPlayerNotZeroPredicate,"NotOfPlayer0"		; -
-		tableEntry createMultiPlayerPredicate,	"MultiPlayer"		; player1, player2, ...
-		tableEntry createMultiEtypPredicate,	"MultiEType"		; etyp1, etyp2, ...
+		tableEntry createMultiPlayerPredicate,	"OfAnyPlayer"		; player1, player2, ...
+		tableEntry createMultiEtypPredicate,	"OfAnyType"		    ; etyp1, etyp2, ...
 		tableEntry createRProviderPredicate,	"ProvidesResource"	; resourceType (raw)
-; ideas: luaFnPredicate, resourceProviderPredicate
+; ideas: luaFnPredicate (prob slower than lua implementation)
         dd 0
         
 sPredTbl    db "Predicate", 0
