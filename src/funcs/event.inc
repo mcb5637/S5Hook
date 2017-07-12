@@ -1,6 +1,17 @@
 section autorun
         call eventSetupFuncs
 
+section luaTable
+        tableEntry patchNetEventTrigger,    "SetNetEventTrigger"
+        tableEntry unpatchNetEventTrigger,  "RemoveNetEventTrigger"
+
+section globalVars
+netEventTriggerRef      dd 0
+netEventTriggerOrig     dd 0
+
+section cleanup
+        call unpatchNetEventTrigger
+
 section code
 
 eventFuncs:
@@ -269,3 +280,88 @@ eventCannonPlacer:                     ; cp(eId, bottom, top, px, py)
         popad
         xor eax, eax
         retn
+
+patchNetEventTrigger:
+        pushad
+        
+        call unpatchNetEventTrigger
+        
+        ; store first arg as trigger func
+        push LUA_REGISTRYINDEX
+        push ebx
+        call [luaL_ref]
+        mov [netEventTriggerRef], eax
+        add esp, 8
+        
+        ; get GUI_Mgr
+        call 525622h
+        
+        ; save old func pointer
+        mov eax, [eax+28h]
+        mov ecx, [eax]
+        mov eax, [ecx]
+        mov [netEventTriggerOrig], eax
+        
+        ; new func pointer
+        mov dword [ecx], netEventTrigger
+        
+        popad
+        mov eax, 0
+        retn
+
+unpatchNetEventTrigger:
+        pushad
+        
+        cmp dword [netEventTriggerRef], 0
+        je .return
+        
+        ; get GUI_Mgr
+        call 525622h
+        
+        ; restore func pointer
+        mov eax, [eax+28h]
+        mov ecx, [eax]
+        mov eax, [netEventTriggerOrig]
+        mov dword [ecx], eax
+        
+        ; clear registryindex
+        push dword [netEventTriggerRef]
+        push LUA_REGISTRYINDEX
+        push ebx
+        call [luaL_unref]
+        add esp, 12
+        mov dword [netEventTriggerRef], 0
+        
+.return:
+        popad
+        mov eax, 0
+        retn
+
+
+netEventTrigger:
+        pushad
+        
+        mov ebx, [luaHandle]
+        
+        ; get func
+        push dword [netEventTriggerRef]
+        push LUA_REGISTRYINDEX
+        push ebx
+        call [lua_rawgeti]
+        add esp, 12
+        
+        push dword [esp+28h]
+        push ebx
+        call shok_lua_pushint
+        
+        ; call func
+        push 0  ; err func
+        push 0  ; return values
+        push 1  ; args
+        push ebx
+        call [lua_pcall]
+        add esp, 16
+        
+        popad
+        jmp [netEventTriggerOrig]
+
