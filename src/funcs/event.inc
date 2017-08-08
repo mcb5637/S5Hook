@@ -351,13 +351,19 @@ netEventTrigger:
         add esp, 12
         
         push dword [esp+28h]
+        ;push ebx
+        ;call shok_lua_pushint
+        call daCreateUDHead ; create memory userdata
+        
+        mov eax, [esp+28h]
+        push dword [eax+4]
         push ebx
-        call shok_lua_pushint
+        call shok_lua_pushint ; eventid
         
         ; call func
         push 0  ; err func
         push 0  ; return values
-        push 1  ; args
+        push 2  ; args
         push ebx
         call [lua_pcall]
         add esp, 16
