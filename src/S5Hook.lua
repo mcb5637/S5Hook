@@ -148,6 +148,13 @@
                                                                             for eID in S5Hook.EntityIterator(Predicate.OfPlayer(1), Predicate.OfCategory(EntityCategories.Military)) do
                                                                                 AddHealth(eID, 100);
                                                                             end
+    
+    CNetEvents: Access to the Settlers NetEvents, where Player input is handeled.
+            S5Hook.SetNetEventTrigger(func)                             Sets a Trigger function, called every time a CNetEvent is created. Parameters are (memoryAccesToObject, eventId).
+            S5Hook.RemoveNetEventTrigger()                              Removes the previously set NetEventTrigger.
+            PostEvent                                                   Provides access to many Entity Orders, previously unavaialble in Lua.
+    
+    
     OnScreenInformation (OSI): 
         Draw additional info near entities into the 3D-View (like healthbar, etc).
         You have to set a trigger function, which will be responsible for drawing 
