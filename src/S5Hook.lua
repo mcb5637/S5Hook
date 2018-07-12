@@ -155,6 +155,11 @@
             PostEvent                                                   Provides access to many Entity Orders, previously unavaialble in Lua.
     
     
+    Additional HurtEntityTrigger Functions:
+            S5Hook.HurtEntityTrigger_GetDamage()                        Returns the Damage that is dealt with this attack.
+            S5Hook.HurtEntityTrigger_SetDamage(damage)                  Overrides the Damage this attack does.
+    
+    
     OnScreenInformation (OSI): 
         Draw additional info near entities into the 3D-View (like healthbar, etc).
         You have to set a trigger function, which will be responsible for drawing 
