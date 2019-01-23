@@ -200,7 +200,7 @@
         end                                                        
     
     Set up with InstallS5Hook(), this needs to be called again after loading a savegame.
-    S5Hook only works with the newest patch version of Settlers5, 1.06!
+    S5Hook only works with the newest patch version of Settlers5, 1.06 and not with the History Edition!
     S5Hook is available immediately, but check the return value, in case the player has a old patchversion.
 ]]
 
@@ -212,6 +212,10 @@ end
 function InstallS5Hook()
     if nil == string.find(Framework.GetProgramVersion(), "1.06.0217") then
         Message("Error: S5Hook requires version patch 1.06!")
+        return false
+    end
+    if XNetwork.Manager_IsNATReady then
+        Message("Error: S5Hook does not work with the History Edition!")
         return false
     end
     
@@ -238,6 +242,10 @@ function InstallS5Hook()
     
     local eID = Logic.CreateEntity(Entities.XD_Plant1, 0, 0, 0, 0)
     local d, w, r = {}, Logic.SetEntityScriptingValue, Logic.GetEntityScriptingValue
+    if (r(eID, -58) ~= 7880308) then
+        Message("Error: vtable not at expected offset!")
+        return false
+    end
     for o, v in loader do 
         d[o] = r(eID, -59+o)
         if v ~= 0 then w(eID, -59+o, v); end
