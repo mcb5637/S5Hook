@@ -53,7 +53,7 @@
                             float radius = -1,      -- optional, neccessary for area hit
                             int targetId = 0,       -- optional, neccessary for single hit
                             int attackerId = 0,     -- optional, used for events & allies when doing area hits
-                            fn hitCallback)         -- optional, fires once the projectile reaches the target, return true to cancel damage events
+                            fn hitCallback)         -- optional, fires once the projectile reaches the target, return true to cancel damage events and GlobalProjectileHitCallback
                             
                                                                 Single-Hit Projectiles:
                                                                     FXArrow, FXCrossBowArrow, FXCavalryArrow, FXCrossBowCavalryArrow, FXBulletRifleman, FXYukiShuriken, FXKalaArrow
@@ -158,6 +158,16 @@
     Additional HurtEntityTrigger Functions:
             S5Hook.HurtEntityTrigger_GetDamage()                        Returns the Damage that is dealt with this attack.
             S5Hook.HurtEntityTrigger_SetDamage(damage)                  Overrides the Damage this attack does.
+    
+    Global Projectile hit callback:
+            S5Hook.SetGlobalProjectileHitCallback(func)                 Sets a function to be called every time a projectile effect hits its target position.
+                                                                            Parameters are (effectType, startPosX, startPosY, targetPosX, targetPosY, attackerId, targetId, damage, aoeRange).
+                                                                            aoeRange is -1 for GGL::CArrowEffect class projectiles and targetid is 0 for GGL::CCannonBallEffect class projectiles
+                                                                            (because they are invalid/not used for this particular effect class).
+                                                                            Any HurtEntityTrigger calls caused by the projectile are executed after the GlobalProjectileHitCallback.
+                                                                            For Projectiles fired by S5Hook.CreateProjectile: The projectile specific callback is called first, if this callback returns true,
+                                                                            nothing more happens. If it doesn't return true the global callback will be called with its parameters filled from the S5Hook.CreateProjectile call.
+            S5Hook.RemoveGlobalProjectileHitCallback()                  Removes the projectile hit callback.
     
     Added Lua 5.1 like bit32 functions:
             bit32.band(...)                                             Returns the bitwise and of all arguments.
