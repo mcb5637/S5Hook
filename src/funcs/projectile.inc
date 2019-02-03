@@ -1,6 +1,14 @@
 section luaTable
         tableEntry createProjectile,        "CreateProjectile"
         tableEntry isValidEffect,           "IsValidEffect"
+        tableEntry setGlobalHitCb,          "SetGlobalProjectileHitCallback"
+        tableEntry removeGlobalHitCb,       "RemoveGlobalProjectileHitCallback"
+
+section globalVars
+globalHitCbLuaFunc          dd 0
+
+section cleanup
+        call removeGlobalHitCb
 
 section code
 
@@ -190,7 +198,7 @@ arrowHitCallback:
         
         mov ebx, [luaHandle]
         push ecx                ; effect obj
-        
+        mov [hurtSource], ecx
         push dword [ecx+58h]
         push LUA_REGISTRYINDEX
         push ebx
@@ -263,3 +271,171 @@ isValidEffect:
         popad
         mov eax, 1
         retn
+; arrow hit cb: 511336h  /  4FF476h
+; vtable adress: 778E24h / 777690h (+24h)
+
+globalHitCallbackArrow:
+        pushad
+        
+        mov ebx, [luaHandle]
+        push ecx
+        
+        push dword [globalHitCbLuaFunc]
+        push LUA_REGISTRYINDEX
+        push ebx
+        call [lua_rawgeti]
+        add esp, 3*4
+        
+        mov eax, [esp]
+        push dword [eax+14h*4] ; efftype
+        push ebx
+        call shok_lua_pushint
+        
+        mov eax, [esp]
+        fld dword [eax+22h*4] ; sx
+        call luaPushFloat
+        
+        mov eax, [esp]
+        fld dword [eax+23h*4] ; sy
+        call luaPushFloat
+        
+        mov eax, [esp]
+        fld dword [eax+26h*4] ; tx
+        call luaPushFloat
+        
+        mov eax, [esp]
+        fld dword [eax+27h*4] ; ty
+        call luaPushFloat
+        
+        mov eax, [esp]
+        push dword [eax+2Fh*4] ; attacker id
+        push ebx
+        call shok_lua_pushint
+        
+        mov eax, [esp]
+        push dword [eax+30h*4] ; target id
+        push ebx
+        call shok_lua_pushint
+        
+        mov eax, [esp]
+        push dword [eax+31h*4] ; damage
+        push ebx
+        call shok_lua_pushint
+        
+        push -1 ; aoe range
+        push ebx
+        call shok_lua_pushint
+        
+        push 0                  ; no err func
+        push 0                  ; no return values
+        push 9                  ; 9 args
+        push ebx
+        call [lua_pcall]
+        add esp, 5*4
+        
+        popad
+        push 511336h ; jump back
+        ret
+
+globalHitCallbackCannonBall:
+        pushad
+        
+        mov ebx, [luaHandle]
+        push ecx
+        
+        push dword [globalHitCbLuaFunc]
+        push LUA_REGISTRYINDEX
+        push ebx
+        call [lua_rawgeti]
+        add esp, 3*4
+        
+        mov eax, [esp]
+        push dword [eax+14h*4] ; efftype
+        push ebx
+        call shok_lua_pushint
+        
+        mov eax, [esp]
+        fld dword [eax+22h*4] ; sx
+        call luaPushFloat
+        
+        mov eax, [esp]
+        fld dword [eax+23h*4] ; sy
+        call luaPushFloat
+        
+        mov eax, [esp]
+        fld dword [eax+26h*4] ; tx
+        call luaPushFloat
+        
+        mov eax, [esp]
+        fld dword [eax+27h*4] ; ty
+        call luaPushFloat
+        
+        mov eax, [esp]
+        push dword [eax+2Fh*4] ; attacker id
+        push ebx
+        call shok_lua_pushint
+        
+        push 0 ; target id
+        push ebx
+        call shok_lua_pushint
+        
+        mov eax, [esp]
+        push dword [eax+32h*4] ; damage
+        push ebx
+        call shok_lua_pushint
+        
+        mov eax, [esp]
+        fld dword [eax+33h*4] ; aoe range
+        call luaPushFloat
+        
+        push 0                  ; no err func
+        push 0                  ; no return values
+        push 9                  ; 9 args
+        push ebx
+        call [lua_pcall]
+        add esp, 5*4
+        
+        popad
+        push 4FF476h ; jump back
+        ret
+
+
+
+setGlobalHitCb:
+        pushad
+        call removeGlobalHitCb
+        
+        push LUA_REGISTRYINDEX ; remember func
+        push ebx
+        call [luaL_ref]
+        mov [globalHitCbLuaFunc], eax
+        add esp, 8
+        
+        mov dword [778E24h+24h], globalHitCallbackArrow ; patch vtable
+        mov dword [777690h+24h], globalHitCallbackCannonBall
+        
+        popad
+        mov eax, 0
+        ret
+
+
+removeGlobalHitCb:
+        pushad
+        mov eax, [globalHitCbLuaFunc]
+        test eax, eax
+        jz .ghcbret
+        
+        push eax                    ; free name table reference
+        push LUA_REGISTRYINDEX
+        push ebx
+        call [luaL_unref]
+        add esp, 3*4
+        
+        mov dword [globalHitCbLuaFunc], 0 ; unpatch vtable
+        mov dword [778E24h+24h], 511336h
+        mov dword [777690h+24h], 4FF476h
+        
+.ghcbret:
+        popad
+        mov eax, 0
+        ret
