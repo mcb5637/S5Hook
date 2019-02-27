@@ -169,6 +169,15 @@
                                                                             nothing more happens. If it doesn't return true the global callback will be called with its parameters filled from the S5Hook.CreateProjectile call.
             S5Hook.RemoveGlobalProjectileHitCallback()                  Removes the projectile hit callback.
     
+    Effect created callback:
+            S5Hook.SetEffectCreatedCallback(func)                       Sets a function to be called every time an effect gets created (Projectiles and normal effects).
+                                                                            Parameters are (effectType, playerId, startPosX, startPosY, targetPosX, targetPosY, attackerId, targetId, damage, radius, effectId).
+                                                                            For GGL::CArrowEffect class effects playerId and radius are invalid.
+                                                                            For GGL::CCannonBallEffect class effects playerId and targetId are invalid.
+                                                                            For all other effets only effectType, playerId, startPosX, startPosY and effectId are valid.
+                                                                            (The content of an invalid parameter is undefined (means I don't know if and for what they are good for, but someone might)).
+            S5Hook.RemoveEffectCreatedCallback()                        Removes the effect created callback.
+    
     Added Lua 5.1 like bit32 functions:
             bit32.band(...)                                             Returns the bitwise and of all arguments.
             bit32.bor(...)                                              Returns the bitwise or of all arguments.

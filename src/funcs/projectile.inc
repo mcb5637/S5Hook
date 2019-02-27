@@ -3,12 +3,17 @@ section luaTable
         tableEntry isValidEffect,           "IsValidEffect"
         tableEntry setGlobalHitCb,          "SetGlobalProjectileHitCallback"
         tableEntry removeGlobalHitCb,       "RemoveGlobalProjectileHitCallback"
+        tableEntry setEffectCreatedCb,      "SetEffectCreatedCallback"
+        tableEntry removeEffectCreatedCb,   "RemoveEffectCreatedCallback"
 
 section globalVars
-globalHitCbLuaFunc          dd 0
+globalHitCbLuaFunc              dd 0
+globalEffectCreatedCbLuaFunc    dd 0
+globalEffectCreatedCbOriginal   dd 0
 
 section cleanup
         call removeGlobalHitCb
+        call removeEffectCreatedCb
 
 section code
 
@@ -434,6 +439,144 @@ removeGlobalHitCb:
         mov dword [globalHitCbLuaFunc], 0 ; unpatch vtable
         mov dword [778E24h+24h], 511336h
         mov dword [777690h+24h], 4FF476h
+        
+.ghcbret:
+        popad
+        mov eax, 0
+        ret
+
+effectCreatedOverride:
+        ;int3
+        push ebx
+        push ecx
+        mov ebx, [luaHandle]
+        
+        push dword [globalEffectCreatedCbLuaFunc]
+        push LUA_REGISTRYINDEX
+        push ebx
+        call [lua_rawgeti]
+        add esp, 3*4
+        
+        mov eax, [esp+0Ch]
+        push dword [eax+ProjDef.effectType]
+        push ebx
+        call shok_lua_pushint
+        
+        mov eax, [esp+0Ch]
+        push dword [eax+ProjDef.playerID]
+        push ebx
+        call shok_lua_pushint
+        
+        mov eax, [esp+0Ch]
+        push ebx
+        fld dword [eax+ProjDef.startX]
+        call luaPushFloat
+        add esp, 4
+        
+        mov eax, [esp+0Ch]
+        push ebx
+        fld dword [eax+ProjDef.startY]
+        call luaPushFloat
+        add esp, 4
+        
+        mov eax, [esp+0Ch]
+        push ebx
+        fld dword [eax+ProjDef.targetX]
+        call luaPushFloat
+        add esp, 4
+        
+        mov eax, [esp+0Ch]
+        push ebx
+        fld dword [eax+ProjDef.targetY]
+        call luaPushFloat
+        add esp, 4
+        
+        mov eax, [esp+0Ch]
+        push dword [eax+ProjDef.attackerID]
+        push ebx
+        call shok_lua_pushint
+        
+        mov eax, [esp+0Ch]
+        push dword [eax+ProjDef.targetID]
+        push ebx
+        call shok_lua_pushint
+        
+        mov eax, [esp+0Ch]
+        push dword [eax+ProjDef.damage]
+        push ebx
+        call shok_lua_pushint
+        
+        mov eax, [esp+0Ch]
+        push ebx
+        fld dword [eax+ProjDef.radius]
+        call luaPushFloat
+        add esp, 4
+        
+        pop ecx
+        push dword [esp+8]
+        call [globalEffectCreatedCbOriginal]
+        
+        push eax
+        push eax
+        push ebx
+        call shok_lua_pushint
+        
+        
+        push 0                  ; no err func
+        push 0                  ; no return values
+        push 11                  ; 9 args
+        push ebx
+        call [lua_pcall]
+        add esp, 4*4
+        
+        pop eax
+        pop ebx
+        ret 4
+
+setEffectCreatedCb:
+        pushad
+        call removeEffectCreatedCb
+        
+        push LUA_REGISTRYINDEX ; remember func
+        push ebx
+        call [luaL_ref]
+        mov [globalEffectCreatedCbLuaFunc], eax
+        add esp, 8
+        
+        ; patch vtable
+        mov dword ecx, [895DACh]
+        mov dword eax, [ecx]
+        
+        mov ecx, [eax+05Ch]
+        mov dword [globalEffectCreatedCbOriginal], ecx
+        mov dword [eax+05Ch], effectCreatedOverride
+        
+        popad
+        mov eax, 0
+        ret
+
+
+removeEffectCreatedCb:
+        pushad
+        mov eax, [globalEffectCreatedCbLuaFunc]
+        test eax, eax
+        jz .ghcbret
+        
+        push eax                    ; free name table reference
+        push LUA_REGISTRYINDEX
+        push ebx
+        call [luaL_unref]
+        add esp, 3*4
+        
+        mov dword [globalEffectCreatedCbLuaFunc], 0 ; unpatch vtable
+        
+        mov dword ecx, [895DACh]
+        mov dword eax, [ecx]
+        
+        mov ecx, [globalEffectCreatedCbOriginal]
+        mov dword [eax+05Ch], ecx
+        
+        
         
 .ghcbret:
         popad
