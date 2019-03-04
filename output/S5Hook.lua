@@ -376,6 +376,6 @@ function S5HookBitSetup()
         if disp > 31 then
             return 0
         end
-        return S5Hook.BitShR(i, 31)
+        return S5Hook.BitShR(i, disp)
     end
 end
