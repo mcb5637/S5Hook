@@ -7,13 +7,17 @@ section luaTable
         tableEntry hurtGetDamage,     "HurtEntityTrigger_GetDamage"
         tableEntry hurtSetDamage,     "HurtEntityTrigger_SetDamage"
         tableEntry hurtGetSource,     "HurtEntityTrigger_GetSource"
+        tableEntry setHurtCb,         "SetHurtEntityCallback"
+        tableEntry removeHurtCb,      "RemoveHurtEntityCallback"
 
 section globalVars
 hurtPointer      dd 0
 hurtSource       dd 0
+hurtCbLuaFunc    dd 0
 
 section cleanup
         call hurtCleanup
+        call removeHurtCb
 
 section code
 
@@ -94,6 +98,49 @@ hurtToCopy:
 hurtJumpTo:
         mov [hurtPointer], esp ; copy pointer to data
         mov [hurtSource], esi ; copy source (entity/arrow)
+        
+        pushad ; check hurt cb and call it
+        mov eax, [hurtCbLuaFunc]
+        test eax, eax
+        jz .nocb
+        
+        mov ebx, [luaHandle]
+        
+        push dword [hurtCbLuaFunc]
+        push LUA_REGISTRYINDEX
+        push ebx
+        call [lua_rawgeti]
+        add esp, 3*4
+        
+        mov eax, [hurtPointer]
+        mov eax, [eax+4]
+        test eax, eax ; attacker might be invalid
+        jz .noattacker
+        push dword [eax+8]
+        jmp .attacker
+.noattacker:
+        push 0
+.attacker:
+        push ebx
+        call shok_lua_pushint
+        
+        mov eax, [hurtPointer]
+        mov eax, [eax+8]
+        push dword [eax+8]
+        push ebx
+        call shok_lua_pushint
+        
+        push 0                  ; no err func
+        push 0                  ; no return values
+        push 2                  ; 2 args
+        push ebx
+        call [lua_pcall]
+        add esp, 4*4
+        
+        
+        
+.nocb:
+        popad
         
         mov eax, 27D687h ; original code that got replaced
         call 5C299Ch
@@ -210,7 +257,7 @@ hurtGetSource:
         
         mov ebx, [esp+24h]  ; get lua state
         
-        mov eax, [hurtSource] ; get source
+        mov eax, [hurtPointer] ; get source (return adress)
         mov eax, [eax]
         
         push eax    ; push it
@@ -221,4 +268,38 @@ hurtGetSource:
         mov eax,1
         retn
 
+
+setHurtCb:
+        pushad
+        call removeHurtCb
+        
+        push LUA_REGISTRYINDEX ; remember func
+        push ebx
+        call [luaL_ref]
+        mov [hurtCbLuaFunc], eax
+        add esp, 8
+        
+        popad
+        mov eax, 0
+        ret
+
+
+removeHurtCb:
+        pushad
+        mov eax, [hurtCbLuaFunc]
+        test eax, eax
+        jz .ghcbret
+        
+        push eax                    ; free name table reference
+        push LUA_REGISTRYINDEX
+        push ebx
+        call [luaL_unref]
+        add esp, 3*4
+        
+        mov dword [hurtCbLuaFunc], 0
+        
+.ghcbret:
+        popad
+        mov eax, 0
+        ret
 
