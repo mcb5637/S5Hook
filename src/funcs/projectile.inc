@@ -331,9 +331,14 @@ globalHitCallbackArrow:
         push ebx
         call shok_lua_pushint
         
+        mov eax, [esp]
+        push dword [eax+17h*4] ; effect id
+        push ebx
+        call shok_lua_pushint
+        
         push 0                  ; no err func
         push 0                  ; no return values
-        push 9                  ; 9 args
+        push 10                 ; 10 args
         push ebx
         call [lua_pcall]
         add esp, 5*4
@@ -393,9 +398,14 @@ globalHitCallbackCannonBall:
         fld dword [eax+33h*4] ; aoe range
         call luaPushFloat
         
+        mov eax, [esp]
+        push dword [eax+17h*4] ; effect id
+        push ebx
+        call shok_lua_pushint
+        
         push 0                  ; no err func
         push 0                  ; no return values
-        push 9                  ; 9 args
+        push 10                 ; 10 args
         push ebx
         call [lua_pcall]
         add esp, 5*4
@@ -446,7 +456,7 @@ removeGlobalHitCb:
         ret
 
 effectCreatedOverride:
-        ;int3
+        
         push ebx
         push ecx
         mov ebx, [luaHandle]
@@ -512,6 +522,11 @@ effectCreatedOverride:
         call luaPushFloat
         add esp, 4
         
+        mov eax, [esp+0Ch]
+        push dword [eax+ProjDef.creatorType]
+        push ebx
+        call shok_lua_pushint
+        
         pop ecx
         push dword [esp+8]
         call [globalEffectCreatedCbOriginal]
@@ -524,7 +539,7 @@ effectCreatedOverride:
         
         push 0                  ; no err func
         push 0                  ; no return values
-        push 11                  ; 9 args
+        push 12                 ; 11 args
         push ebx
         call [lua_pcall]
         add esp, 4*4
