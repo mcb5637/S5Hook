@@ -269,7 +269,6 @@ function InstallS5Hook()
     __mem.__index = function(t, k) return __mem[k] or __mem.cr(t, k); end
     
     local loader     = { @@stage0.yx@@ }
-    local S5HookData = "@@S5Hook.yx@@"
     
     local shrink = function(cc)
         local o, i = {}, 1
@@ -296,7 +295,7 @@ function InstallS5Hook()
         d[o] = r(eID, -59+o)
         if v ~= 0 then w(eID, -59+o, v); end
     end
-    Logic.HeroSetActionPoints(eID, 7517305, shrink(S5HookData))
+    Logic.HeroSetActionPoints(eID, 7517305, shrink(table.concat(S5HookData)))
     for o, v in d do w(eID, -59+o, v); end
     Logic.DestroyEntity(eID)
     
@@ -402,3 +401,14 @@ S5HookHurtEntitySources = {
     CircularAttackAbility = 5236524,
     SniperAttackAbility = 5092867,
 }
+
+local s5h = "@@S5Hook.yx@@"
+
+S5HookData = {}
+local len = string.len(s5h)
+local left = len
+while left > 0 do
+	local chunk = left > 10000 and 10000 or left
+	table.insert(S5HookData, string.sub(s5h, len - left + 1, len - left + chunk))
+	left = left - chunk
+end
