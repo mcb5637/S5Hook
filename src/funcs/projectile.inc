@@ -5,6 +5,7 @@ section luaTable
         tableEntry removeGlobalHitCb,       "RemoveGlobalProjectileHitCallback"
         tableEntry setEffectCreatedCb,      "SetEffectCreatedCallback"
         tableEntry removeEffectCreatedCb,   "RemoveEffectCreatedCallback"
+        tableEntry getEffectObject,         "GetEffectMem"
 
 section globalVars
 globalHitCbLuaFunc              dd 0
@@ -276,6 +277,39 @@ isValidEffect:
         popad
         mov eax, 1
         retn
+
+
+getEffectObject:
+        pushad
+        mov ebx, [esp + 24h]
+        
+        push 1
+        push ebx
+        call shok_lua_toint
+        
+        push eax                        ; effectID
+        mov dword ecx, [0898144h]       ;EffectManager instance
+        call 04FAAE3h                   ;get effect object from id
+        
+        test eax, eax
+        jnz .entityOK
+        
+        popad
+        xor eax, eax
+        retn
+        
+.entityOK:
+        
+        push eax
+        call daCreateUDHead
+        
+        popad
+        mov eax, 1
+        retn
+
+
+
+
 ; arrow hit cb: 511336h  /  4FF476h
 ; vtable adress: 778E24h / 777690h (+24h)
 
