@@ -48,12 +48,12 @@
                             float startX, 
                             float startY, 
                             float targetX, 
-                            float targetY 
-                            int damage = 0,         -- optional, neccessary to do damage
-                            float radius = -1,      -- optional, neccessary for area hit
-                            int targetId = 0,       -- optional, neccessary for single hit
-                            int attackerId = 0,     -- optional, used for events & allies when doing area hits
-                            fn hitCallback)         -- optional, fires once the projectile reaches the target, return true to cancel damage events and GlobalProjectileHitCallback
+                            float targetY, 
+                            int damage,             -- set to 0 if not needed
+                            float radius,           -- set to -1 if not needed
+                            int targetId,           -- set to 0 if not needed
+                            int attackerId,         -- set to 0 if not needed
+                            fn hitCallback)         -- fires once the projectile reaches the target (function or something with metamethod, set explicit nil if not needed)
                             
                                                                 Single-Hit Projectiles:
                                                                     FXArrow, FXCrossBowArrow, FXCavalryArrow, FXCrossBowCavalryArrow, FXBulletRifleman, FXYukiShuriken, FXKalaArrow
@@ -114,6 +114,7 @@
 
     MemoryAccess: Direct access to game objects                         !!!DO NOT USE IF YOU DON'T KNOW WHAT YOU'RE DOING!!!
             S5Hook.GetEntityMem(int eID)                                Gets the address of a entity object
+            S5Hook.GetEffectMem(int effectID)                           Gets the adress of an effect object
             S5Hook.GetRawMem(int ptr)                                   Gets a raw pointer
             val = obj[n]                                                Dereferences obj and returns a new address: *obj+4n
             shifted = obj:Offset(n)                                     Returns a new pointer, shifted by n: obj+4n
@@ -179,16 +180,17 @@
                                                                             aoeRange is -1 for GGL::CArrowEffect class projectiles and targetid is 0 for GGL::CCannonBallEffect class projectiles
                                                                             (because they are invalid/not used for this particular effect class).
                                                                             Any HurtEntityTrigger calls caused by the projectile are executed after the GlobalProjectileHitCallback.
-                                                                            For Projectiles fired by S5Hook.CreateProjectile: The projectile specific callback is called first, if this callback returns true,
-                                                                            nothing more happens. If it doesn't return true the global callback will be called with its parameters filled from the S5Hook.CreateProjectile call.
+                                                                            For Projectiles fired by S5Hook.CreateProjectile: The projectile specific callback is called first,
+                                                                            the global callback will be called after that with its parameters filled from the S5Hook.CreateProjectile call.
             S5Hook.RemoveGlobalProjectileHitCallback()                  Removes the projectile hit callback.
     
     Effect created callback:
             S5Hook.SetEffectCreatedCallback(func)                       Sets a function to be called every time an effect gets created (Projectiles and normal effects).
-                                                                            Parameters are (effectType, playerId, startPosX, startPosY, targetPosX, targetPosY, attackerId, targetId, damage, radius, creatorType, effectId).
+                                                                            Parameters are (effectType, playerId, startPosX, startPosY, targetPosX, targetPosY, attackerId, targetId, damage, radius, creatorType, effectId, isHookCreated).
                                                                             For GGL::CArrowEffect class effects playerId and radius are invalid.
                                                                             For GGL::CCannonBallEffect class effects playerId and targetId are invalid.
                                                                             For all other effets only effectType, playerId, startPosX, startPosY, creatorType and effectId are valid.
+                                                                            isHookCreated is 1 if this effect is a projectile created by S5Hook.CreateProjectile, 0 otherwise.
                                                                             creatorType can determine, what type of effect will be created: 7790912 -> normal effect, 7816856 -> projectile effect
                                                                             (The content of an invalid parameter is undefined (means I don't know if and for what they are good for, but someone might)).
             S5Hook.RemoveEffectCreatedCallback()                        Removes the effect created callback.
@@ -267,6 +269,10 @@ function InstallS5Hook()
     
     if not __mem then __mem = {}; end
     __mem.__index = function(t, k) return __mem[k] or __mem.cr(t, k); end
+    
+    if not __effectcbs then
+        __effectcbs = {}
+    end
     
     local loader     = { @@stage0.yx@@ }
     
