@@ -1,22 +1,30 @@
 section luaTable
-        tableEntry createProjectile,        "CreateProjectile"
+        tableEntry createProjectileNew,     "CreateProjectile"
         tableEntry isValidEffect,           "IsValidEffect"
         tableEntry setGlobalHitCb,          "SetGlobalProjectileHitCallback"
         tableEntry removeGlobalHitCb,       "RemoveGlobalProjectileHitCallback"
         tableEntry setEffectCreatedCb,      "SetEffectCreatedCallback"
         tableEntry removeEffectCreatedCb,   "RemoveEffectCreatedCallback"
         tableEntry getEffectObject,         "GetEffectMem"
+        tableEntry testgettype,             "testgettype"
 
 section globalVars
 globalHitCbLuaFunc              dd 0
 globalEffectCreatedCbLuaFunc    dd 0
 globalEffectCreatedCbOriginal   dd 0
+createProjectileMarker          dd 0
+
+section autorun
+        call setGlobalHitCbHook
 
 section cleanup
         call removeGlobalHitCb
         call removeEffectCreatedCb
+        call removeGlobalHitCbHook
 
 section code
+
+sEffectCbsTable                 dd "__effectcbs", 0
 
 struc ProjDef
     .creatorType:   resd 1
@@ -56,8 +64,12 @@ endstruc
                         ;   10  [, fn hitCallback]]]])
 
               
-createProjectile:
+createProjectileNew:
         pushad
+        
+        mov dword [createProjectileMarker], 1
+        
+        ; make sruct
         mov ebx, [esp + 24h]
         sub esp, ProjDef.size
         mov ebp, esp
@@ -69,191 +81,113 @@ createProjectile:
         dec ecx
         jnz .clear
         
-        
+        ;fill struct
         mov dword [ebp + ProjDef.creatorType], 774698h        ;CProjectileEffectCreator
         
-        push ebx
-        call [lua_gettop]
-        pop esi
-        mov esi, eax
-        
         push 1
-        call .getLuaFloat
-        push 2
-        call .getLuaFloat
-        push 3
-        call .getLuaFloat
-        push 4
-        call .getLuaFloat
-        push 5
-        call .getLuaFloat
+        push ebx
+        call shok_lua_toint
+        mov dword [ebp + ProjDef.effectType], eax
         
-        fstp dword [ebp + ProjDef.targetY]
-        fstp dword [ebp + ProjDef.targetX]
-        fst dword [ebp + ProjDef.startY]
-        fstp dword [ebp + ProjDef.startYcopy]
+        push 2
+        push esi
+        call [lua_tonumber]
+        add esp, 8
         fst dword [ebp + ProjDef.startX]
         fstp dword [ebp + ProjDef.startXcopy]
-        fistp dword [ebp + ProjDef.effectType]
-        
-        sub esi, 5
-        jz .noDamage
-        
+
+        push 3
+        push esi
+        call [lua_tonumber]
+        add esp, 8
+        fst dword [ebp + ProjDef.startY]
+        fstp dword [ebp + ProjDef.startYcopy]
+
+        push 4
+        push esi
+        call [lua_tonumber]
+        fstp dword [ebp + ProjDef.targetX]
+        add esp, 8
+
+        push 5
+        push esi
+        call [lua_tonumber]
+        fstp dword [ebp + ProjDef.targetY]
+        add esp, 8
+
         push 6
-        call .getLuaFloat
-        fistp dword [ebp + ProjDef.damage]
-        
-        dec esi
-        jz .noRadius
+        push ebx
+        call shok_lua_toint
+        mov dword [ebp + ProjDef.damage], eax
         
         push 7
-        call .getLuaFloat
+        push esi
+        call [lua_tonumber]
         fstp dword [ebp + ProjDef.radius]
-        
-        dec esi
-        jz .noTargetId
-        
+        add esp, 8
+
         push 8
-        call .getLuaFloat
-        fistp dword [ebp + ProjDef.targetID]
-        
-        dec esi
-        jz .noAttackerId
+        push ebx
+        call shok_lua_toint
+        mov dword [ebp + ProjDef.targetID], eax
         
         push 9
-        call .getLuaFloat
-        fistp dword [ebp + ProjDef.attackerID]
+        push ebx
+        call shok_lua_toint
+        mov dword [ebp + ProjDef.attackerID], eax
         
-        jmp .setupDone
-        
-.noDamage:
-        ;mov dword [ebp + ProjDef.damage], 0        ;already nulled
-
-.noRadius:
-        mov dword [ebp + ProjDef.radius], 0BF800000h ; -1.0
-        
-.noTargetId:
-        ;mov dword [ebp + ProjDef.targetID], 0
-        
-.noAttackerId:
-        ;mov dword [ebp + ProjDef.attackerID], 0
-        
-.setupDone:
-        
+        ; call createeffect
         push ebp
         mov dword ecx, [895DACh]
         mov dword eax, [ecx]
         
-        call [eax+05Ch]
-        push eax                    ;effectID
+        call [eax+05Ch] ; createeffect, returns id
         
-        sub esi, 2                  ; if all 10 params, esi becomes 0, no sign
-        js .noCb
+        ; set 10th arg as callback in global table
+        push eax
         
-        mov esi, [esp-24h]          ;esi = &effectObj
-        
-        push LUA_REGISTRYINDEX
+        push sEffectCbsTable
         push ebx
-        call [luaL_ref]
-        mov [esi+58h], eax          ; effectObj+58 = playerID (unused for projectiles)
+        call shok_lua_pushstring
+        
+        push LUA_GLOBALSINDEX
+        push ebx
+        call [lua_rawget]
         add esp, 8
         
-        push dword [esi]                    ;orig vtable location
-        call createFakeEffectVtable
-        mov [esi], eax
-        
-        
-.noCb:
-
-        fild dword [esp]            ;effectID
-        call luaPushFloat
         pop eax
-
+        push eax
+        
+        push eax
+        push ebx
+        call shok_lua_pushint
+        
+        push 10
+        push ebx
+        call [lua_pushvalue]
+        add esp, 8
+        
+        push -3
+        push ebx
+        call [lua_settable]
+        add esp, 8
+        
+        pop eax
+        
+        ; set return
+        push eax
+        push ebx
+        call shok_lua_pushint
+        
         add esp, ProjDef.size
+        
+        mov dword [createProjectileMarker], 0
+        
         popad
         mov eax, 1
         retn
-        
-        
-.getLuaFloat:
-        push dword [esp+4]
-        push ebx
-        call [lua_tonumber]
-        add esp, 8
-        retn 4
 
 
-createFakeEffectVtable:
-        push esi
-        mov esi, [esp+8]            ;orig vtable
-        
-        push 4*12
-        call malloc
-        pop edi
-        mov [eax+4*11], esi
-        mov edi, eax
-        mov ecx, 4*11
-        rep movsb
-        
-        mov dword [eax+24h], arrowHitCallback
-        pop esi
-        retn 4
-
-arrowHitCallback:
-        pushad
-        
-        mov ebx, [luaHandle]
-        push ecx                ; effect obj
-        mov [hurtSource], ecx
-        push dword [ecx+58h]
-        push LUA_REGISTRYINDEX
-        push ebx
-        call [lua_rawgeti]
-        call [luaL_unref]
-        
-        push 0                  ; no err func
-        push 1                  ; 1 return value
-        push 0                  ; no args
-        push ebx
-        call [lua_pcall]
-        
-        push -1
-        push ebx
-        call [lua_toboolean]    ; returns true to cancel attack
-        mov esi, eax
-        
-        push 0
-        push ebx
-        call [lua_settop]
-        
-        add esp, 11*4
-        
-        ;cleanup
-        pop ecx                 ; effect obj
-        mov eax, [ecx]          ; fake vtable
-        mov edi, [eax+11*4]     ; 12th element = orig vtable
-        mov [ecx], edi
-        
-        push eax                ; free fake vtable
-        call free
-        pop eax
-        
-        test esi, esi
-        jnz .stopAttack
-        
-        popad
-        mov eax, [ecx]
-        jmp [eax + 24h]        ; original virtual hit method
-        
-.stopAttack:
-        popad
-        
-        mov eax, [ecx]
-        push 1
-        call [eax]              ; call destructor on CFlyingEffect
-        retn
-        
-        
 ; bool S5Hook.IsValidEffect(int effectID)
 isValidEffect:
         pushad
@@ -308,7 +242,88 @@ getEffectObject:
         retn
 
 
+doCreatedProjectileCallbackFor: ; lua state in ebx, effid in ecx
+        push ecx
+        
+        ; get table
+        push sEffectCbsTable
+        push ebx
+        call shok_lua_pushstring
+        
+        push LUA_GLOBALSINDEX
+        push ebx
+        call [lua_rawget]
+        add esp, 8
+        
+        ; get potential func
+        pop ecx
+        push ecx
+        push ecx
+        push ebx
+        call shok_lua_pushint
+        
+        push -2
+        push ebx
+        call [lua_rawget]
+        add esp, 8
+        
+        ; remove func from global
+        pop ecx
+        push ecx
+        push ecx
+        push ebx
+        call shok_lua_pushint
+        
+        push ebx
+        call [lua_pushnil]
+        add esp, 4
+        
+        push -4
+        push ebx
+        call [lua_settable]
+        add esp, 8
+        
+        ; check type
+        push -1
+        push ebx
+        call [lua_type]
+        add esp, 8
+        
+        cmp eax, LUA_TNIL
+        je .nocb
+        
+        ; call function
+        pop ecx
+        push ecx
+        push ecx
+        push ebx
+        call shok_lua_pushint
+        
+        push 0                  ; no err func
+        push 0                  ; no return values
+        push 1                  ; 1 args
+        push ebx
+        call [lua_pcall]
+        add esp, 4*4
+        
+.nocb:
+        pop ecx
+        ret
 
+
+testgettype:
+        push -1
+        push ebx
+        call [lua_type]
+        add esp, 8
+        
+        push eax
+        push ebx
+        call shok_lua_pushint
+        
+        mov eax, 1
+        ret
+        
 
 ; arrow hit cb: 511336h  /  4FF476h
 ; vtable adress: 778E24h / 777690h (+24h)
@@ -318,6 +333,19 @@ globalHitCallbackArrow:
         
         mov ebx, [luaHandle]
         push ecx
+        
+        
+        mov eax, [esp]
+        mov ecx, [eax+17h*4] ; effect id
+        call doCreatedProjectileCallbackFor
+        
+        
+        ; global callback
+        mov eax, [globalHitCbLuaFunc]
+        cmp eax, 0
+        je .noCb
+        
+        
         
         push dword [globalHitCbLuaFunc]
         push LUA_REGISTRYINDEX
@@ -377,6 +405,12 @@ globalHitCallbackArrow:
         call [lua_pcall]
         add esp, 5*4
         
+        jmp .return
+        
+.noCb:
+        pop eax
+        
+.return:
         popad
         push 511336h ; jump back
         ret
@@ -386,6 +420,19 @@ globalHitCallbackCannonBall:
         
         mov ebx, [luaHandle]
         push ecx
+        
+        
+        mov eax, [esp]
+        mov ecx, [eax+17h*4] ; effect id
+        call doCreatedProjectileCallbackFor
+        
+        
+        ; global callback
+        mov eax, [globalHitCbLuaFunc]
+        cmp eax, 0
+        je .noCb
+        
+        
         
         push dword [globalHitCbLuaFunc]
         push LUA_REGISTRYINDEX
@@ -444,11 +491,21 @@ globalHitCallbackCannonBall:
         call [lua_pcall]
         add esp, 5*4
         
+        jmp .return
+        
+.noCb:
+        pop eax
+        
+.return:
         popad
         push 4FF476h ; jump back
         ret
 
-
+setGlobalHitCbHook:
+        mov dword [778E24h+24h], globalHitCallbackArrow ; patch vtable
+        mov dword [777690h+24h], globalHitCallbackCannonBall
+        ret
+        
 
 setGlobalHitCb:
         pushad
@@ -460,13 +517,14 @@ setGlobalHitCb:
         mov [globalHitCbLuaFunc], eax
         add esp, 8
         
-        mov dword [778E24h+24h], globalHitCallbackArrow ; patch vtable
-        mov dword [777690h+24h], globalHitCallbackCannonBall
-        
         popad
         mov eax, 0
         ret
 
+removeGlobalHitCbHook:
+        mov dword [778E24h+24h], 511336h ; unpatch vtable
+        mov dword [777690h+24h], 4FF476h
+        ret
 
 removeGlobalHitCb:
         pushad
@@ -480,9 +538,7 @@ removeGlobalHitCb:
         call [luaL_unref]
         add esp, 3*4
         
-        mov dword [globalHitCbLuaFunc], 0 ; unpatch vtable
-        mov dword [778E24h+24h], 511336h
-        mov dword [777690h+24h], 4FF476h
+        mov dword [globalHitCbLuaFunc], 0
         
 .ghcbret:
         popad
@@ -494,6 +550,11 @@ effectCreatedOverride:
         push ebx
         push ecx
         mov ebx, [luaHandle]
+        
+        push 14
+        push ebx
+        call [lua_checkstack]
+        add esp, 2*4
         
         push dword [globalEffectCreatedCbLuaFunc]
         push LUA_REGISTRYINDEX
@@ -570,10 +631,14 @@ effectCreatedOverride:
         push ebx
         call shok_lua_pushint
         
+        push dword [createProjectileMarker]
+        push ebx
+        call shok_lua_pushint
+        
         
         push 0                  ; no err func
         push 0                  ; no return values
-        push 12                 ; 11 args
+        push 13                 ; 13 args
         push ebx
         call [lua_pcall]
         add esp, 4*4
