@@ -2,13 +2,15 @@ section autorun
         call hurtSetup
 
 section luaTable
-        tableEntry hurtGetPointer,    "HurtEntityTrigger_DBG_GetPointer"
-        tableEntry hurtResetPointer,  "HurtEntityTrigger_Reset"
-        tableEntry hurtGetDamage,     "HurtEntityTrigger_GetDamage"
-        tableEntry hurtSetDamage,     "HurtEntityTrigger_SetDamage"
-        tableEntry hurtGetSource,     "HurtEntityTrigger_GetSource"
-        tableEntry setHurtCb,         "SetHurtEntityCallback"
-        tableEntry removeHurtCb,      "RemoveHurtEntityCallback"
+        tableEntry hurtGetPointer,              "HurtEntityTrigger_DBG_GetPointer"
+        tableEntry hurtResetPointer,            "HurtEntityTrigger_Reset"
+        tableEntry hurtGetDamage,               "HurtEntityTrigger_GetDamage"
+        tableEntry hurtSetDamage,               "HurtEntityTrigger_SetDamage"
+        tableEntry hurtGetSource,               "HurtEntityTrigger_GetSource"
+        tableEntry setHurtCb,                   "SetHurtEntityCallback"
+        tableEntry removeHurtCb,                "RemoveHurtEntityCallback"
+        tableEntry callHurtEntity,              "EntityAttackTarget"
+        tableEntry getCallHurtEntitySource,     "GetHookAttackEntitySource"
 
 section globalVars
 hurtPointer      dd 0
@@ -303,3 +305,50 @@ removeHurtCb:
         mov eax, 0
         ret
 
+
+callHurtEntity:
+        pushad
+        mov ebx, [esp+24h]
+        ;int3
+        
+        ; get damage and push it onto stack (arg3)
+        push 3
+        push ebx
+        call shok_lua_toint
+        push eax
+        
+        ; target id (arg2)
+        push 2
+        push ebx
+        call shok_lua_toint
+        push eax
+        call shok_eid2obj
+        push eax
+        
+        ; attacker id (arg1)
+        push 1
+        push ebx
+        call shok_lua_toint
+        push eax
+        call shok_eid2obj ; returns 0 on invalid entity
+        push eax
+        
+        call 49F358h
+callHurtEntitySourceAdr:
+        add esp, 4*3
+        
+        popad
+        mov eax, 0
+        ret
+
+getCallHurtEntitySource:
+        pushad
+        mov ebx, [esp+24h]
+        
+        push callHurtEntitySourceAdr
+        push ebx
+        call shok_lua_pushint
+
+        popad
+        mov eax, 1
+        ret
