@@ -117,6 +117,7 @@ installer:
 %include 'funcs/fonts.inc'
 %include 'funcs/hurtentity.inc'
 %include 'funcs/bits.inc'
+%include 'funcs/animations.inc'
     
 leaveJump     equ    40AA1Fh
 leaveOffset equ leaveGameHook - (leaveJump + 5)

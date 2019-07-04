@@ -6,7 +6,6 @@ section luaTable
         tableEntry setEffectCreatedCb,      "SetEffectCreatedCallback"
         tableEntry removeEffectCreatedCb,   "RemoveEffectCreatedCallback"
         tableEntry getEffectObject,         "GetEffectMem"
-        tableEntry testgettype,             "testgettype"
 
 section globalVars
 globalHitCbLuaFunc              dd 0
@@ -310,21 +309,6 @@ doCreatedProjectileCallbackFor: ; lua state in ebx, effid in ecx
         pop ecx
         ret
 
-
-testgettype:
-        push -1
-        push ebx
-        call [lua_type]
-        add esp, 8
-        
-        push eax
-        push ebx
-        call shok_lua_pushint
-        
-        mov eax, 1
-        ret
-        
-
 ; arrow hit cb: 511336h  /  4FF476h
 ; vtable adress: 778E24h / 777690h (+24h)
 
@@ -624,6 +608,7 @@ effectCreatedOverride:
         
         pop ecx
         push dword [esp+8]
+        
         call [globalEffectCreatedCbOriginal]
         
         push eax
