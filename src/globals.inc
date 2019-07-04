@@ -23,6 +23,9 @@ realloc         equ 5C4193h     ; cdecl void *realloc(ptr, newSize)
 calloc          equ 5C4340h     ; cdecl void *calloc(size)
 free            equ 5C2E2Dh     ; cdecl void free(ptr)
 
+shok_getAnimIdFromName          equ 54F19Eh ; ecx=[shok_getAnimIdFromNameObjectP] pString -> int
+shok_getAnimIdFromNameObjectP   equ 0A0C838h
+
 
 ; "global" vars
 luaHandle       equ 853A9Ch ;ptr

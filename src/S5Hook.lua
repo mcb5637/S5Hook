@@ -202,6 +202,9 @@
                                                                             (The content of an invalid parameter is undefined (means I don't know if and for what they are good for, but someone might)).
             S5Hook.RemoveEffectCreatedCallback()                        Removes the effect created callback.
     
+    S5Hook.GetAnimIdFromName(animName)                                  Returns an animation ID for use with mem funcs from an animation name (string) which can be copied from the xmls.
+    
+    
     Added Lua 5.1 like bit32 functions:
             bit32.band(...)                                             Returns the bitwise and of all arguments.
             bit32.bor(...)                                              Returns the bitwise or of all arguments.
