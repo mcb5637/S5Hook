@@ -26,6 +26,16 @@ free            equ 5C2E2Dh     ; cdecl void free(ptr)
 shok_getAnimIdFromName          equ 54F19Eh ; ecx=[shok_getAnimIdFromNameObjectP] pString -> int
 shok_getAnimIdFromNameObjectP   equ 0A0C838h
 
+shok_Framework_CMainInstance    equ 84EF60h
+shok_FileSystemMgr              equ 88F088h
+shok_FileSystemMgrVtO_MakePathAbsloute equ 30h ; (PrelPath, PabsPath)
+shok_FileSystemMgrVtO_LoadArchive   equ 18h ; (atTopFlag, path)
+shok_FileSystemMgrOO_BeginPointer   equ 8
+shok_FileSystemMgrEntryOO_Filename  equ 0Ch
+shok_FileSystemMgrVtO_RemoveTopArchive  equ 28h ; ()
+
+string_mapsUser                 equ 779F88h
+string_dots5x                   equ 763058h
 
 ; "global" vars
 luaHandle       equ 853A9Ch ;ptr

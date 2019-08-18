@@ -1,6 +1,7 @@
 section luaTable
-        tableEntry addArchive,      "AddArchive"
-        tableEntry removeArchive,   "RemoveArchive"
+        tableEntry addArchive,          "AddArchive"
+        tableEntry removeArchive,       "RemoveArchive"
+        tableEntry getTopArchivePath,   "GetTopArchive"
         
 section strings
 mapPathFmt  db "%s\%s"        ; includes .s5x 
@@ -20,7 +21,7 @@ addArchive:
         test eax, eax
         jnz .loadArchive
         
-        mov ecx, [84EF60h]          ;Framework_CMain Instance
+        mov ecx, [shok_Framework_CMainInstance]
         cmp dword  [ecx+2Ch], 10h   ; len < 16
         jb .embeddedStr
         mov ecx, [ecx+18h]
@@ -31,7 +32,7 @@ addArchive:
         
 .combinePath:
         push ecx
-        push 779F88h                ;"maps\user\0"
+        push string_mapsUser                ;"maps\user\0"
         push mapPathFmt
         push ebp
         call sprintf
@@ -40,18 +41,18 @@ addArchive:
         push ebp                    ; relPath
         lea ebp, [ebp+80h]
         push ebp                    ; absPath
-        mov dword ecx, [88F088h]
+        mov dword ecx, [shok_FileSystemMgr]
         mov edx, [ecx]
-        call [edx+30h]              ; makePathAbsolute()
+        call [edx+shok_FileSystemMgrVtO_MakePathAbsloute]              ; makePathAbsolute()
         mov eax, ebp
         
 .loadArchive:
         push 1                      ; at top flag
         push eax                    ; filename
         
-        mov dword ecx, [88F088h]
+        mov dword ecx, [shok_FileSystemMgr]
         mov edx, [ecx]
-        call [edx+18h]              ; loadArchive
+        call [edx+shok_FileSystemMgrVtO_LoadArchive]              ; loadArchive
         
         add esp, 100h
         popad
@@ -62,12 +63,12 @@ removeArchive:                          ; [[[[88F088h]+8]]+0ch]
         pushad
         mov ebx, [esp + 24h]
         
-        mov dword esi, [88F088h]        ; FileSystemMgr
-        mov eax, [esi+8]                ; begin ptr
+        mov dword esi, [shok_FileSystemMgr]        ; FileSystemMgr
+        mov eax, [esi+shok_FileSystemMgrOO_BeginPointer]                ; begin ptr
         mov eax, [eax]                  ; top entry
-        mov eax, [eax+0Ch]              ; string with filename
+        mov eax, [eax+shok_FileSystemMgrEntryOO_Filename]              ; string with filename
         
-        push 763058h                    ; ".s5x\0"
+        push string_dots5x                    ; ".s5x\0"
         push eax
         call strstr
         add esp, 8
@@ -77,9 +78,27 @@ removeArchive:                          ; [[[[88F088h]+8]]+0ch]
         
         mov ecx, esi
         mov edx, [ecx]
-        call [edx+28h]                  ; remove top archive
+        call [edx+shok_FileSystemMgrVtO_RemoveTopArchive]                  ; remove top archive
         
 .notfound:
         popad
         xor eax, eax
         retn
+
+getTopArchivePath:
+        pushad
+        
+        mov dword esi, [shok_FileSystemMgr]
+        mov eax, [esi+shok_FileSystemMgrOO_BeginPointer]
+        mov eax, [eax]
+        mov eax, [eax+shok_FileSystemMgrEntryOO_Filename]
+        
+        push eax
+        push ebx
+        call shok_lua_pushstring
+        
+        popad
+        mov eax, 1
+        retn
+
+
