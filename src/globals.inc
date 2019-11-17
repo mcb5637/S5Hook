@@ -34,6 +34,12 @@ shok_FileSystemMgrOO_BeginPointer   equ 8
 shok_FileSystemMgrEntryOO_Filename  equ 0Ch
 shok_FileSystemMgrVtO_RemoveTopArchive  equ 28h ; ()
 
+shok_GGL_CWorkerBehaviorVt      equ 772B30h
+shok_GGL_CWorkerBehavior_GetMaxWorktimeAdr equ 4CE866h
+
+shok_EGL_CGLEEntityOO_BehaviorListStart equ 31*4
+shok_EGL_CGLEEntityOO_BehaviorListEnd equ 32*4
+
 string_mapsUser                 equ 779F88h
 string_dots5x                   equ 763058h
 
