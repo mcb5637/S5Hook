@@ -29,6 +29,8 @@
     S5Hook.SetSettlerMotivation(eID, motivation)                Set the motivation for a single settler (and only settlers, crashes otherwise ;)
                                                                  - motivation 1 = 100%, 0.2 = 20% settlers leaves
                                                                  
+    S5Hook.GetSettlerMaxWorktime(eID)                           Gets the maximum worktime for a worker. (Although Farm+Residence regenerates more than this amount)
+                                                                 
     S5Hook.GetWidgetPosition(widget)                            Gets the widget position relative to its parent
                                                                 - return1: X
                                                                 - return2: Y
