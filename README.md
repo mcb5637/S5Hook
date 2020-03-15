@@ -1,3 +1,6 @@
+This is a fork (and conversion to git) from https://bitbucket.org/settlersdev/s5hook/src/default/
+(bitbucket dropped hg support)
+
 # S5Hook
 
 S5Hook is a extension for Settlers 5 which can be loaded at runtime through the Lua script embedded in a usermap.
@@ -7,6 +10,3 @@ Include the code from `output/S5Hook.lua` in your map and execute `InstallS5Hook
 
 ### Building
 Simply execute the `build.bat` to build the source code into a ready-to-use Lua script.
-
-### Download
-Get the latest version of [S5Hook](https://bitbucket.org/settlersdev/s5hook/raw/tip/output/S5Hook.lua), download with Alt+Click!
