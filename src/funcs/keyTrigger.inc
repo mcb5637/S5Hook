@@ -41,9 +41,7 @@ setKeyTrig:
         xor eax, eax
         retn
 
-keyCall     equ 40757Eh     ; jmp address of call
 keyOffset equ keyTrigger - (keyCall + 4)
-keyOrig     equ 54E82Fh
 keyOrigOff  equ keyOrig - (keyCall + 4)
 
 keyTrigger:             ; call from 40757E

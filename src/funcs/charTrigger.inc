@@ -41,9 +41,7 @@ setCharTrig:
         xor eax, eax
         retn
 
-charCall    equ 40754Dh     ; jmp address of call
 charOffset  equ charTrigger - (charCall + 4)
-charOrig    equ 54E649h
 charOrigOff equ charOrig - (charCall + 4)
 
 charTrigger:                

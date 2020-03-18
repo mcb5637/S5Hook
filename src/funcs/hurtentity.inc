@@ -154,29 +154,29 @@ hurtJumpTo:
 hurtSetup:
         pushad
         
-        mov eax, [49F358h]
+        mov eax, [shok_EntityHurtEntity]
         mov [hurtCopied], eax
         
-        mov eax, [49F358h+4]
+        mov eax, [shok_EntityHurtEntity+4]
         mov [hurtCopied+4], eax
         
-        mov eax, [49F358h+8]
+        mov eax, [shok_EntityHurtEntity+8]
         mov [hurtCopied+8], eax
         
-        mov eax, [49F358h+0Ch]
+        mov eax, [shok_EntityHurtEntity+0Ch]
         mov [hurtCopied+0Ch], eax
         
         mov eax, [hurtToCopy]
-        mov [49F358h], eax
+        mov [shok_EntityHurtEntity], eax
         
         mov eax, [hurtToCopy+4]
-        mov [49F358h+4], eax
+        mov [shok_EntityHurtEntity+4], eax
         
         mov eax, [hurtToCopy+8]
-        mov [49F358h+8], eax
+        mov [shok_EntityHurtEntity+8], eax
         
         mov eax, [hurtToCopy+0Ch]
-        mov [49F358h+0Ch], eax
+        mov [shok_EntityHurtEntity+0Ch], eax
         
         popad
         retn
@@ -185,16 +185,16 @@ hurtCleanup:
         pushad
         
         mov eax, [hurtCopied]
-        mov [49F358h], eax
+        mov [shok_EntityHurtEntity], eax
         
         mov eax, [hurtCopied+4]
-        mov [49F358h+4], eax
+        mov [shok_EntityHurtEntity+4], eax
         
         mov eax, [hurtCopied+8]
-        mov [49F358h+8], eax
+        mov [shok_EntityHurtEntity+8], eax
         
         mov eax, [hurtCopied+0Ch]
-        mov [49F358h+0Ch], eax
+        mov [shok_EntityHurtEntity+0Ch], eax
         
         popad
         retn
@@ -333,7 +333,7 @@ callHurtEntity:
         call shok_eid2obj ; returns 0 on invalid entity
         push eax
         
-        call 49F358h
+        call shok_EntityHurtEntity
 callHurtEntitySourceAdr:
         add esp, 4*3
         

@@ -81,9 +81,9 @@ entityIterate:          ; internal iterator, arg = my iter obj
         push edi
         push ebp
         mov esi, [esp+10h]      ; iter obj
-        mov edi, [897558h]      ; global entity mgr   
-        mov ebp, [edi+4]        ; entry count
-        add edi, 6*4            ; start entity table
+        mov edi, [shok_globalEntityManager]      ; global entity mgr   
+        mov ebp, [edi+shok_globalEntityManagerOOCount]        ; entry count
+        add edi, shok_globalEntityManagerOOStartEntityTable            ; start entity table
         lea ebp, [edi + 8*ebp]  ; ebp = end ptr
         add edi, [esi]          ; add current pos, edi = running ptr
 
@@ -123,11 +123,11 @@ entityIterate:          ; internal iterator, arg = my iter obj
         jmp .writeBack
 .doneRes:
         mov eax, [edi+4]        ; entityObj
-        mov eax, [eax+8]        ; eID
+        mov eax, [eax+shok_EGL_CGLEEntityOO_Id]        ; eID
         
 .writeBack:
         sub edi, 6*4-8
-        sub edi, [897558h]
+        sub edi, [shok_globalEntityManager]
         mov [esi], edi          ; write back current pos
         
         pop ebp
@@ -224,7 +224,7 @@ createCirclePredicate:
         push dword [ebp]
         lea eax, [ebp+4]
         push eax
-        call 579F9Ah ; thiscall CGLEEntityDistancePredicate_ctor_579F9A(<ecx> this, float centerPosXY[], float r)
+        call shok_CGLEEntityDistancePredicate_ctor_579F9A ; thiscall CGLEEntityDistancePredicate_ctor_579F9A(<ecx> this, float centerPosXY[], float r)
         
         add esp, 3*4
         popad
@@ -274,7 +274,7 @@ createRectPredicate:
         push ebp
         add dword [esp], 8
         push ebp
-        call 579EF8h ; thiscall CGLEEntityPredicateArea_ctor_579EF8(<ecx> this, float posA[], float posB[])
+        call shok_CGLEEntityPredicateArea_ctor_579EF8 ; thiscall CGLEEntityPredicateArea_ctor_579EF8(<ecx> this, float posA[], float posB[])
         
         add esp, 4*4
         popad
@@ -290,7 +290,7 @@ createPlayerPredicate:
         mov esi, eax
         add esp, 8
         
-        mov [esi], dword 77B900h    ;CPlayerPredicate
+        mov [esi], dword shok_CPlayerPredicate    ;CPlayerPredicate
         
         push 1
         push ebx
@@ -310,7 +310,7 @@ createTypePredicate:
         mov esi, eax
         add esp, 8
         
-        mov [esi], dword 766CA0h    ;CGLEEntityTypePredicate
+        mov [esi], dword shok_CGLEEntityTypePredicate    ;CGLEEntityTypePredicate
         
         push 1
         push ebx
@@ -329,7 +329,7 @@ createBuildingPredicate:
         call [lua_newuserdata]
         add esp, 8
         
-        mov [eax], dword 77046Ch    ;CGLIsBuildingPredicate
+        mov [eax], dword shok_CGLIsBuildingPredicate    ;CGLIsBuildingPredicate
         
         popad
         mov eax, 1
@@ -344,7 +344,7 @@ createCatPredicate:
         mov esi, eax
         add esp, 8
         
-        mov [esi], dword 774E84h    ;CEntityCategoryPredicate
+        mov [esi], dword shok_CEntityCategoryPredicate    ;CEntityCategoryPredicate
         
         push 1
         push ebx
@@ -364,7 +364,7 @@ createUpCatPredicate:
         mov esi, eax
         add esp, 8
         
-        mov [esi], dword 777964h    ;CUpgradeCategoryPredicate
+        mov [esi], dword shok_CUpgradeCategoryPredicate    ;CUpgradeCategoryPredicate
         
         push 1
         push ebx
@@ -385,7 +385,7 @@ createRProviderPredicate:
         mov esi, eax
         add esp, 8
         
-        mov [esi], dword 76FF44h    ;CResourceProviderPredicate
+        mov [esi], dword shok_CResourceProviderPredicate    ;CResourceProviderPredicate
         
         push 1
         push ebx
@@ -405,7 +405,7 @@ createSectorPredicate:
         mov esi, eax
         add esp, 8
         
-        mov [esi], dword 772B24h    ;CSectorPredicate
+        mov [esi], dword shok_CSectorPredicate    ;CSectorPredicate
         
         push 1
         push ebx
@@ -438,7 +438,7 @@ playerNotZeroPredicateFunc:		; ecx -> arg0 this (not used)
 		
 		mov ebx, [esp+24h] ; arg1 -> pointer to entity object
 		
-		mov ecx, [ebx+18h] ; load player
+		mov ecx, [ebx+shok_EGL_CGLEEntityOO_PlayerId] ; load player
 		
 		cmp ecx, 0 ; check zero
 		jne .rtrue
@@ -511,7 +511,7 @@ multiPlayerPredicateFunc:		; ecx -> arg0 this
 		
 		mov ebx, [esp+24h] ; arg1 -> pointer to entity object
 		
-		mov ebx, [ebx+18h] ; load player
+		mov ebx, [ebx+shok_EGL_CGLEEntityOO_PlayerId] ; load player
 		
 		mov eax, 0
 		
@@ -596,7 +596,7 @@ multiEtypPredicateFunc: ; ecx -> arg0 this
 		
 		mov ebx, [esp+24h] ; arg1 -> pointer to entity object
 		
-		mov ebx, [ebx+10h] ; load etyp
+		mov ebx, [ebx+shok_EGL_CGLEEntityOO_TypeId] ; load etyp
 		
 		mov eax, 0
 		

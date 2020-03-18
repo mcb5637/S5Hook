@@ -40,7 +40,7 @@ eventExtractResource:           ; xr(eID, resourceType, x, y)
         sub esp, 24
         mov ebp, esp
         
-        mov dword [ebp], 77061Ch      ; CNetEventExtractResource
+        mov dword [ebp], GGL_CNetEventExtractResourceVt      ; CNetEventExtractResource
         mov dword [ebp+4], 69657      ; eventID
         
         push 1
@@ -62,7 +62,7 @@ eventExtractResource:           ; xr(eID, resourceType, x, y)
         fstp dword [ebp+20]     ; y
         
         push ebp
-        call 525D77h
+        call shok_postNetEvent
         
         add esp, 24+4
         
@@ -77,7 +77,7 @@ event2Entities:                     ; e2(eventID, eID1, eID2)
         sub esp, 16
         mov ebp, esp
         
-        mov dword [ebp], 76DD60h      ; CNetEvent2Entities
+        mov dword [ebp], EGL_CNetEvent2EntitiesVt      ; CNetEvent2Entities
         
         push 1
         push ebx
@@ -95,7 +95,7 @@ event2Entities:                     ; e2(eventID, eID1, eID2)
         mov [ebp+12], eax       ; eID2
         
         push ebp
-        call 525D77h
+        call shok_postNetEvent
         
         add esp, 16+4
         
@@ -110,7 +110,7 @@ eventEntityPos:                     ; ep(eventID, eID, px, py)
         sub esp, 20
         mov ebp, esp
         
-        mov dword [ebp], 76DD50h      ; CNetEventEntityAndPos
+        mov dword [ebp], EGL_CNetEventEntityAndPosVt      ; CNetEventEntityAndPos
         
         push 1
         push ebx
@@ -131,7 +131,7 @@ eventEntityPos:                     ; ep(eventID, eID, px, py)
         fstp dword [ebp+16]     ; y
         
         push ebp
-        call 525D77h
+        call shok_postNetEvent
         
         add esp, 20+4
         
@@ -146,7 +146,7 @@ eventEntity:                     ; e(eventID, eID)
         sub esp, 12
         mov ebp, esp
         
-        mov dword [ebp], 766C28h      ; CNetEventEntityId
+        mov dword [ebp], EGL_CNetEventEntityIDVt      ; CNetEventEntityId
         
         push 1
         push ebx
@@ -159,7 +159,7 @@ eventEntity:                     ; e(eventID, eID)
         mov [ebp+8], eax        ; eID1
         
         push ebp
-        call 525D77h
+        call shok_postNetEvent
         
         add esp, 12+4
         
@@ -174,7 +174,7 @@ eventEntityPlayer:                     ; epl(eventID, player, eID)
         sub esp, 16
         mov ebp, esp
         
-        mov dword [ebp], 766C38h      ; CNetEventEntityIDAndPlayerID
+        mov dword [ebp], EGL_CNetEventEntityIDAndPlayerIDVt      ; CNetEventEntityIDAndPlayerID
         
         push 1
         push ebx
@@ -192,7 +192,7 @@ eventEntityPlayer:                     ; epl(eventID, player, eID)
         mov [ebp+12], eax        ; eID
         
         push ebp
-        call 525D77h
+        call shok_postNetEvent
         
         add esp, 16+4
         
@@ -207,7 +207,7 @@ eventEntityInt:                     ; epl(eventID, eId, int)
         sub esp, 16
         mov ebp, esp
         
-        mov dword [ebp], 766C48h      ; CNetEventEntityIDAndInteger
+        mov dword [ebp], EGL_CNetEventEntityIDAndIntegerVt      ; CNetEventEntityIDAndInteger
         
         push 1
         push ebx
@@ -225,7 +225,7 @@ eventEntityInt:                     ; epl(eventID, eId, int)
         mov [ebp+12], eax        ; int
         
         push ebp
-        call 525D77h
+        call shok_postNetEvent
         
         add esp, 16+4
         
@@ -240,7 +240,7 @@ eventCannonPlacer:                     ; cp(eId, bottom, top, px, py)
         sub esp, 40
         mov ebp, esp
         
-        mov dword [ebp], 7705ECh      ; CNetEventCannonCreator
+        mov dword [ebp], GGL_CNetEventCannonCreatorVt      ; CNetEventCannonCreator
         mov dword [ebp+4], 69679      ; eventID
         
         push 1
@@ -273,7 +273,7 @@ eventCannonPlacer:                     ; cp(eId, bottom, top, px, py)
         mov dword [ebp+28], 0
         
         push ebp
-        call 525D77h
+        call shok_postNetEvent
         
         add esp, 40+4
         
@@ -294,10 +294,10 @@ patchNetEventTrigger:
         add esp, 8
         
         ; get GUI_Mgr
-        call 525622h
+        call shok_GetGUIMgr
         
         ; save old func pointer
-        mov eax, [eax+28h]
+        mov eax, [eax+shok_GUIMgrOONetEvent]
         mov ecx, [eax]
         mov eax, [ecx]
         mov [netEventTriggerOrig], eax
@@ -316,10 +316,10 @@ unpatchNetEventTrigger:
         je .return
         
         ; get GUI_Mgr
-        call 525622h
+        call shok_GetGUIMgr
         
         ; restore func pointer
-        mov eax, [eax+28h]
+        mov eax, [eax+shok_GUIMgrOONetEvent]
         mov ecx, [eax]
         mov eax, [netEventTriggerOrig]
         mov dword [ecx], eax
@@ -370,4 +370,3 @@ netEventTrigger:
         
         popad
         jmp [netEventTriggerOrig]
-

@@ -300,7 +300,7 @@ daGetString:
         retn
         
 setHighFPUPrecision:
-        call 5C8451h
+        call shok_setHighPrecision
         xor eax, eax
         retn
 

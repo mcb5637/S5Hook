@@ -27,6 +27,8 @@ shok_getAnimIdFromName          equ 54F19Eh ; ecx=[shok_getAnimIdFromNameObjectP
 shok_getAnimIdFromNameObjectP   equ 0A0C838h
 
 shok_Framework_CMainInstance    equ 84EF60h
+shok_Framework_CMainOOLen       equ 2Ch
+shok_Framework_CMainOOUnknown1  equ 18h     ; TODO HE also check some offsets might be left
 shok_FileSystemMgr              equ 88F088h
 shok_FileSystemMgrVtO_MakePathAbsloute equ 30h ; (PrelPath, PabsPath)
 shok_FileSystemMgrVtO_LoadArchive   equ 18h ; (atTopFlag, path)
@@ -40,8 +42,64 @@ shok_GGL_CWorkerBehavior_GetMaxWorktimeAdr equ 4CE866h
 shok_EGL_CGLEEntityOO_BehaviorListStart equ 31*4
 shok_EGL_CGLEEntityOO_BehaviorListEnd equ 32*4
 
+shok_GetGUIMgr                  equ 525622h
+shok_GUIMgrOONetEvent           equ 28h
+
+shok_GetFontIdMgr               equ 5593ADh
+shok_GetFontObject              equ 5597C7h ; (this, id) TODO HE call by vtable?
+shok_FontOOSize                 equ 4
+shok_FontOOZOffset              equ 8
+shok_FontOOSpacing              equ 0Ch
+
+shok_EntityHurtEntity           equ 49F358h
+
+shok_postNetEvent               equ 525D77h
+
+GGL_CNetEventExtractResourceVt  equ 77061Ch
+EGL_CNetEvent2EntitiesVt        equ 76DD60h
+EGL_CNetEventEntityAndPosVt     equ 76DD50h
+EGL_CNetEventEntityIDVt         equ 766C28h
+EGL_CNetEventEntityIDAndPlayerIDVt  equ 766C38h
+EGL_CNetEventEntityIDAndIntegerVt   equ 766C48h
+GGL_CNetEventCannonCreatorVt    equ 7705ECh
+
+shok_globalEntityManager        equ 897558h
+shok_globalEntityManagerOOCount equ 4
+shok_globalEntityManagerOOStartEntityTable  equ 6*4
+
+shok_EGL_CGLEEntityOO_Id        equ 8
+shok_EGL_CGLEEntityOO_PlayerId  equ 18h
+shok_EGL_CGLEEntityOO_TypeId    equ 10h
+
 string_mapsUser                 equ 779F88h
 string_dots5x                   equ 763058h
+
+shok_CGLEEntityDistancePredicate_ctor_579F9A     equ 579F9Ah ; thiscall CGLEEntityDistancePredicate_ctor_579F9A(<ecx> this, float centerPosXY[], float r)
+shok_CGLEEntityPredicateArea_ctor_579EF8         equ 579EF8h ; thiscall CGLEEntityPredicateArea_ctor_579EF8(<ecx> this, float posA[], float posB[])
+shok_CPlayerPredicate           equ 77B900h    ;CPlayerPredicate
+shok_CGLEEntityTypePredicate    equ 766CA0h    ;CGLEEntityTypePredicate
+shok_CGLIsBuildingPredicate     equ 77046Ch    ;CGLIsBuildingPredicate
+shok_CEntityCategoryPredicate   equ 774E84h    ;CEntityCategoryPredicate
+shok_CUpgradeCategoryPredicate  equ 777964h    ;CUpgradeCategoryPredicate
+shok_CResourceProviderPredicate equ 76FF44h    ;CResourceProviderPredicate
+shok_CSectorPredicate           equ 772B24h    ;CSectorPredicate
+
+shok_LoadGUIGetObject           equ 5563CCh
+shok_LoadGUI                    equ 556464h
+shok_setHighPrecision           equ 5C8451h
+
+; TODO HE  changeString: no idea how this works
+; TODO HE  customnames: some funky jmp hacking
+; TODO HE  hurtentity: maybe do better func hacking
+; TODO HE  motivation: 180 entity oo ? should be invalid ?
+; TODO HE  remove or fix mousetrigger
+
+charCall    equ 40754Dh     ; jmp address of call
+charOrig    equ 54E649h
+
+
+keyCall     equ 40757Eh     ; jmp address of call
+keyOrig     equ 54E82Fh
 
 ; "global" vars
 luaHandle       equ 853A9Ch ;ptr

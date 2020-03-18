@@ -22,9 +22,9 @@ addArchive:
         jnz .loadArchive
         
         mov ecx, [shok_Framework_CMainInstance]
-        cmp dword  [ecx+2Ch], 10h   ; len < 16
+        cmp dword  [ecx+shok_Framework_CMainOOLen], 10h   ; len < 16
         jb .embeddedStr
-        mov ecx, [ecx+18h]
+        mov ecx, [ecx+shok_Framework_CMainOOUnknown1]
         jmp .combinePath
 .embeddedStr:
         add ecx, 18h

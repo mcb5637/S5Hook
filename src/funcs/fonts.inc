@@ -10,9 +10,9 @@ getFontObj:
         call shok_lua_toint
         push eax
         
-        call 5593ADh            ; get font id mgr 
+        call shok_GetFontIdMgr            ; get font id mgr 
         mov ecx, eax          
-        call 5597C7h            ; get font obj(this, id)
+        call shok_GetFontObject            ; get font obj(this, id)
         test eax, eax
         retn
         
@@ -23,9 +23,9 @@ getFontConfig:
         call getFontObj
         jz fontNotFound
 
-        fld dword [eax+0Ch]     ;spacing
-        fld dword [eax+8]       ;zOffset
-        fld dword [eax+4]       ;size
+        fld dword [eax+shok_FontOOSpacing]     ;spacing
+        fld dword [eax+shok_FontOOZOffset]       ;zOffset
+        fld dword [eax+shok_FontOOSize]       ;size
         
         call luaPushFloat
         call luaPushFloat
@@ -54,9 +54,9 @@ setFontConfig:
         call getFontObj
         jz fontNotFound
         
-        fstp dword [eax+0Ch]     ;spacing
-        fstp dword [eax+8]       ;zOffset
-        fstp dword [eax+4]       ;size
+        fstp dword [eax+shok_FontOOSpacing]     ;spacing
+        fstp dword [eax+shok_FontOOZOffset]       ;zOffset
+        fstp dword [eax+shok_FontOOSize]       ;size
         
 fontNotFound:
         popad

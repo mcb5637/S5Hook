@@ -13,9 +13,9 @@ loadGuiXml:
         add esp, 8
         push eax                ; arg2 = path
         
-        call 5563CCh
+        call shok_LoadGUIGetObject
         mov ecx, eax            ; arg3 in ecx
-        call 556464h
+        call shok_LoadGUI
         
         popad
         xor eax, eax
