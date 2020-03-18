@@ -209,6 +209,9 @@
     S5Hook.GetAnimIdFromName(animName)                                  Returns an animation ID for use with mem funcs from an animation name (string) which can be copied from the xmls.
     
     
+    S5Hook.TeleportSettler(id, px, py)                                  Teleports a settler (crashes with buildings) to a target position (by Kimichura).
+    
+    
     Added Lua 5.1 like bit32 functions:
             bit32.band(...)                                             Returns the bitwise and of all arguments.
             bit32.bor(...)                                              Returns the bitwise or of all arguments.

@@ -118,6 +118,7 @@ installer:
 %include 'funcs/hurtentity.inc'
 %include 'funcs/bits.inc'
 %include 'funcs/animations.inc'
+%include 'funcs/teleportentity.inc'
     
 leaveJump     equ    40AA1Fh
 leaveOffset equ leaveGameHook - (leaveJump + 5)
