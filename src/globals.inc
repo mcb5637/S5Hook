@@ -88,8 +88,10 @@ shok_LoadGUIGetObject           equ 5563CCh
 shok_LoadGUI                    equ 556464h
 shok_setHighPrecision           equ 5C8451h
 
-shok_teleportentity             equ 57BC78h
-shok_logicMoveSettler           equ 4D8B01h
+shok_teleportentity             equ 57BC78h     ; thiscall (<ecx> this, float posXY[])
+shok_logicMoveSettler           equ 4D8B01h     ; cdecl luaapi
+
+shok_IsSettler                  equ 4A2B62h     ; cdecl (ep) -> ep
 
 
 ; TODO HE  changeString: no idea how this works

@@ -20,6 +20,7 @@ eiPredFuncs:
 		tableEntry createMultiPlayerPredicate,	"OfAnyPlayer"		; player1, player2, ...
 		tableEntry createMultiEtypPredicate,	"OfAnyType"		    ; etyp1, etyp2, ...
 		tableEntry createRProviderPredicate,	"ProvidesResource"	; resourceType (raw)
+        tableEntry createIsSettlerPredicate,    "IsSettler"         ; -
 ; ideas: luaFnPredicate (prob slower than lua implementation)
         dd 0
         
@@ -623,4 +624,42 @@ multiEtypPredicateFunc: ; ecx -> arg0 this
 		mov eax, 1
 		retn 4
 
+
+createIsSettlerPredicate:
+		pushad
+        
+        push 8
+        push ebx
+        call [lua_newuserdata]
+        mov esi, eax
+        add esp, 8
+        
+        mov [esi], esi									; pointer to own adress -> object is own vtable
+		
+		mov [esi+4], dword playerIsSettlerPredicateFunc	; func at +4
+        
+        popad
+        mov eax, 1
+        retn
+
+playerIsSettlerPredicateFunc:		; ecx -> arg0 this (not used)
+		pushad
+		
+		mov ebx, [esp+24h] ; arg1 -> pointer to entity object
+		
+		push ebx
+        call shok_IsSettler
+        test eax, eax
+		jnz .rtrue
+		
+        add esp, 4
+		popad
+		mov eax, 0
+		retn 4
+		
+.rtrue:
+        add esp, 4
+		popad
+		mov eax, 1
+		retn 4
 
