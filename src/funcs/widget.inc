@@ -9,12 +9,12 @@ section code
 getWidgetObject:
         push 1
         push ebx
-        call 55AE12h  ; widget in eax
+        call shok_GetWidgetObjF1  ; widget in eax
 
         push eax
-        call 558473h
+        call shok_GetWidgetObjF2
         mov ecx, eax
-        call 558966h ; widget obj in eax
+        call shok_GetWidgetObjF3 ; widget obj in eax
         
         add esp, 8
         retn
@@ -36,8 +36,8 @@ getWidgetPosition:
         test eax, eax
         jz widgetNotFound
 
-        fld dword [eax+18h]   ;y pos
-        fld dword [eax+14h]   ;x pos
+        fld dword [eax+shok_widgetOOy]   ;y pos
+        fld dword [eax+shok_widgetOOx]   ;x pos
         
         call luaPushFloat
         call luaPushFloat
@@ -54,8 +54,8 @@ getWidgetSize:
         test eax, eax
         jz widgetNotFound
 
-        fld dword [eax+20h]   ;y size
-        fld dword [eax+1Ch]   ;x size
+        fld dword [eax+shok_widgetOOySiz]   ;y size
+        fld dword [eax+shok_widgetOOxSiz]   ;x size
         
         call luaPushFloat
         call luaPushFloat
@@ -70,22 +70,22 @@ widgetNotFound:
         retn
 
 widgetPatchOneLoadFn:
-        add dword [eax+1], (59BD99h-59BD81h)
-        mov word [eax+5], 04EBh
+        add dword [eax+shok_widgetpatchOff1], (shok_widgetpatch5-shok_widgetpatch6)
+        mov word [eax+shok_widgetpatchOff2], shok_widgetpatchOff2Cmp
         retn
         
 widgetPatchSetPAS:
-        mov eax, 5617A7h
-        cmp byte [eax+5], 0EBh
+        mov eax, shok_widgetpatch1
+        cmp byte [eax+shok_widgetpatchOff3], shok_widgetpatchOff3Cmp
         je .done
         
         call widgetPatchOneLoadFn
-        add eax, (5617B8h - 5617A7h)
+        add eax, (shok_widgetpatch2 - shok_widgetpatch1)
         call widgetPatchOneLoadFn
-        add eax, (5617C9h - 5617B8h)
+        add eax, (shok_widgetpatch3 - shok_widgetpatch2)
         call widgetPatchOneLoadFn
-        add eax, (5617DAh - 5617C9h)
+        add eax, (shok_widgetpatch4 - shok_widgetpatch3)
         call widgetPatchOneLoadFn
-        mov word [eax+11], 0F685h           ;test esi, esi
+        mov word [eax+shok_widgetpatchOff4], shok_widgetpatchOff4Cmp           ;test esi, esi
 .done:
         retn

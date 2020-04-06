@@ -94,11 +94,119 @@ shok_logicMoveSettler           equ 4D8B01h     ; cdecl luaapi
 shok_IsSettler                  equ 4A2B62h     ; cdecl (ep) -> ep
 
 
+shok_CProjectileEffectCreator   equ 774698h
+shok_createprojectileVTP        equ 895DACh
+shok_createprojectileVtO        equ 05Ch
+shok_EffectManagerInstance      equ 0898144h
+shok_EffectManagerEffectExists  equ 04FAABDh
+shok_EffectManagerEffidToObj    equ 04FAAE3h    ; vto?
+
+shok_EGL_CEffectOOEffectID      equ 17h*4
+shok_EGL_CEffectOOEffectType    equ 14h*4
+shok_EGL_CEffectOOEffectSX      equ 22h*4
+shok_EGL_CEffectOOEffectSY      equ 23h*4
+shok_EGL_CEffectOOEffectTX      equ 26h*4
+shok_EGL_CEffectOOEffectTY      equ 27h*4
+shok_EGL_CEffectOOEffectAttID   equ 2Fh*4
+shok_GGL_CArrowEffectOOEffectTarID equ 30h*4
+shok_GGL_CArrowEffectOOEffectDamage equ 31h*4
+shok_GGL_CCannonBallEffectOOEffectDamage equ 32h*4
+shok_GGL_CCannonBallEffectOOAoERange equ 33h*4
+
+shok_GGL_CArrowEffectVt         equ 778E24h
+shok_GGL_CCannonBallEffectVt    equ 777690h
+shok_EGL_CFlyingEffectVtOHitCallback equ 24h
+shok_GGL_CArrowEffect_HitCallback equ 511336h
+shok_GGL_CCannonBallEffect_HitCallback equ 4FF476h
+
+shok_ReloadEntitiesPtr          equ 84EF60h
+shok_ReloadEntitiesO1           equ 258h
+shok_ReloadEntitiesO2           equ 0Ch
+shok_ReloadEntitiesFunc         equ 5B9A97h
+
+shok_str_mapsexternalmap        equ 779FFCh
+shok_reloadCutsceneObj          equ 0A0344Ch
+shok_reloadCutsceneVtOReload    equ 0Ch
+
+shok_CGLEGameLogicObj           equ 895DACh
+shok_CGLELandscapeOO            equ 4*9
+shok_floatXYToTerrainGrid       equ 585C21h
+shok_toTerrainCoordMysteriousFunc equ 449D52h
+shok_CGLELandscapeOOCGLETerrainHiRes equ 28
+shok_CGLETerrainHiResOOWidth    equ 28
+shok_CGLETerrainHiResOOHeightTab equ 8
+shok_CGlobalsLogicExObj         equ 8581ECh
+shok_CGlobalsLogicExOff1        equ 24
+shok_CGlobalsLogicExOff2        equ 4
+shok_GlobalMapSize              equ 898B74h
+shok_getSector                  equ 577461h     ; (x, y) -> s
+shok_CGLEGameLogicOOCGLETerrainLowRes equ 24h
+shok_CGLEGameLogicOOCGLETerrainLowRes2 equ 20h
+shok_CGLEGameLogicOOCGLETerrainLowResOOLen equ 2Ch
+shok_CGLEGameLogicOOCGLETerrainLowResOOBase equ 8
+
+shok_CGLGameLogicOP             equ 85A3A0h
+shok_CGLGameLogicOO1            equ 40
+shok_CGLGameLogic_getPlayerStatus equ 4A91BCh
+shok_playerstatusOOCBuildingUpgradeManager equ 792
+shok_CBuildingUpgradeManagerAdd equ 4B3D42h
+shok_CBuildingUpgradeManagerOO equ 20h
+shok_CBuildingUpgradeManagerGetObj equ 4CA5A2h
+shok_CBuildingUpgradeManagerGetObjOOScholars equ 0
+shok_CBuildingUpgradeManagerGetObjOO0 equ 4
+
+shok_GetWidgetObjF1             equ 55AE12h
+shok_GetWidgetObjF2             equ 558473h
+shok_GetWidgetObjF3             equ 558966h
+shok_widgetOOx                  equ 14h
+shok_widgetOOy                  equ 18h
+shok_widgetOOxSiz               equ 1Ch
+shok_widgetOOySiz               equ 20h
+shok_widgetpatch1               equ 5617A7h
+shok_widgetpatch2               equ 5617B8h
+shok_widgetpatch3               equ 5617C9h
+shok_widgetpatch4               equ 5617DAh
+shok_widgetpatch5               equ 59BD99h
+shok_widgetpatch6               equ 59BD81h
+shok_widgetpatchOff1            equ 1
+shok_widgetpatchOff2            equ 5
+shok_widgetpatchOff2Cmp         equ 04EBh
+shok_widgetpatchOff3            equ 5
+shok_widgetpatchOff3Cmp         equ 0EBh
+shok_widgetpatchOff4            equ 11
+shok_widgetpatchOff4Cmp         equ 0F685h
+
+
 ; TODO HE  changeString: no idea how this works
 ; TODO HE  customnames: some funky jmp hacking
 ; TODO HE  hurtentity: maybe do better func hacking
-; TODO HE  motivation: 180 entity oo ? should be invalid ?
+; TODO HE  motivation: wtf is yoq doing there?
 ; TODO HE  remove or fix mousetrigger
+; TODO HE  no idea how musicfix works
+; TODO HE  no idea how osi works
+
+struc ProjDef
+    .creatorType:   resd 1
+    .effectType:    resd 1
+                    resd 1
+    .playerID       resd 1
+    
+    .startXcopy:    resd 1
+    .startYcopy:    resd 1
+    .startX:        resd 1  ;f
+    .startY:        resd 1  ;f
+    .targetX:       resd 1  ;f
+    .targetY:       resd 1  ;f
+    
+                    resd 1
+    .attackerID:    resd 1
+    .targetID:      resd 1
+    .damage:        resd 1  ;int
+    .radius:        resd 1  ;f
+    
+                    resd 3
+    .size:
+endstruc
 
 charCall    equ 40754Dh     ; jmp address of call
 charOrig    equ 54E649h

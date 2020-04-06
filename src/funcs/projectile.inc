@@ -25,29 +25,6 @@ section code
 
 sEffectCbsTable                 dd "__effectcbs", 0
 
-struc ProjDef
-    .creatorType:   resd 1
-    .effectType:    resd 1
-                    resd 1
-    .playerID       resd 1
-    
-    .startXcopy:    resd 1
-    .startYcopy:    resd 1
-    .startX:        resd 1  ;f
-    .startY:        resd 1  ;f
-    .targetX:       resd 1  ;f
-    .targetY:       resd 1  ;f
-    
-                    resd 1
-    .attackerID:    resd 1
-    .targetID:      resd 1
-    .damage:        resd 1  ;int
-    .radius:        resd 1  ;f
-    
-                    resd 3
-    .size:
-endstruc
-
 
 
 ;ex: S5Hook.CreateProjectile(12, 3500,4000,3200,2900, 10, -1, 65541, 131078, function() Message(42); end)
@@ -81,7 +58,7 @@ createProjectileNew:
         jnz .clear
         
         ;fill struct
-        mov dword [ebp + ProjDef.creatorType], 774698h        ;CProjectileEffectCreator
+        mov dword [ebp + ProjDef.creatorType], shok_CProjectileEffectCreator        ;CProjectileEffectCreator
         
         push 1
         push ebx
@@ -137,10 +114,10 @@ createProjectileNew:
         
         ; call createeffect
         push ebp
-        mov dword ecx, [895DACh]
+        mov dword ecx, [shok_createprojectileVTP]
         mov dword eax, [ecx]
         
-        call [eax+05Ch] ; createeffect, returns id
+        call [eax+shok_createprojectileVtO] ; createeffect, returns id
         
         ; set 10th arg as callback in global table
         push eax
@@ -197,8 +174,8 @@ isValidEffect:
         call shok_lua_toint
         
         push eax                        ; effectID
-        mov dword ecx, [0898144h]       ;EffectManager instance
-        call 04FAABDh                   ;bool Mgr::EffectExists(eID)
+        mov dword ecx, [shok_EffectManagerInstance]       ;EffectManager instance
+        call shok_EffectManagerEffectExists                   ;bool Mgr::EffectExists(eID)
         
         movzx eax, al
         push eax
@@ -221,8 +198,8 @@ getEffectObject:
         call shok_lua_toint
         
         push eax                        ; effectID
-        mov dword ecx, [0898144h]       ;EffectManager instance
-        call 04FAAE3h                   ;get effect object from id
+        mov dword ecx, [shok_EffectManagerInstance]       ;EffectManager instance
+        call shok_EffectManagerEffidToObj                   ;get effect object from id
         
         test eax, eax
         jnz .entityOK
@@ -320,7 +297,7 @@ globalHitCallbackArrow:
         
         
         mov eax, [esp]
-        mov ecx, [eax+17h*4] ; effect id
+        mov ecx, [eax+shok_EGL_CEffectOOEffectID] ; effect id
         call doCreatedProjectileCallbackFor
         
         
@@ -338,38 +315,38 @@ globalHitCallbackArrow:
         add esp, 3*4
         
         mov eax, [esp]
-        push dword [eax+14h*4] ; efftype
+        push dword [eax+shok_EGL_CEffectOOEffectType] ; efftype
         push ebx
         call shok_lua_pushint
         
         mov eax, [esp]
-        fld dword [eax+22h*4] ; sx
+        fld dword [eax+shok_EGL_CEffectOOEffectSX] ; sx
         call luaPushFloat
         
         mov eax, [esp]
-        fld dword [eax+23h*4] ; sy
+        fld dword [eax+shok_EGL_CEffectOOEffectSY] ; sy
         call luaPushFloat
         
         mov eax, [esp]
-        fld dword [eax+26h*4] ; tx
+        fld dword [eax+shok_EGL_CEffectOOEffectTX] ; tx
         call luaPushFloat
         
         mov eax, [esp]
-        fld dword [eax+27h*4] ; ty
+        fld dword [eax+shok_EGL_CEffectOOEffectTY] ; ty
         call luaPushFloat
         
         mov eax, [esp]
-        push dword [eax+2Fh*4] ; attacker id
+        push dword [eax+shok_EGL_CEffectOOEffectAttID] ; attacker id
         push ebx
         call shok_lua_pushint
         
         mov eax, [esp]
-        push dword [eax+30h*4] ; target id
+        push dword [eax+shok_GGL_CArrowEffectOOEffectTarID] ; target id
         push ebx
         call shok_lua_pushint
         
         mov eax, [esp]
-        push dword [eax+31h*4] ; damage
+        push dword [eax+shok_GGL_CArrowEffectOOEffectDamage] ; damage
         push ebx
         call shok_lua_pushint
         
@@ -378,7 +355,7 @@ globalHitCallbackArrow:
         call shok_lua_pushint
         
         mov eax, [esp]
-        push dword [eax+17h*4] ; effect id
+        push dword [eax+shok_EGL_CEffectOOEffectID] ; effect id
         push ebx
         call shok_lua_pushint
         
@@ -396,7 +373,7 @@ globalHitCallbackArrow:
         
 .return:
         popad
-        push 511336h ; jump back
+        push shok_GGL_CArrowEffect_HitCallback ; jump back
         ret
 
 globalHitCallbackCannonBall:
@@ -407,7 +384,7 @@ globalHitCallbackCannonBall:
         
         
         mov eax, [esp]
-        mov ecx, [eax+17h*4] ; effect id
+        mov ecx, [eax+shok_EGL_CEffectOOEffectID] ; effect id
         call doCreatedProjectileCallbackFor
         
         
@@ -425,28 +402,28 @@ globalHitCallbackCannonBall:
         add esp, 3*4
         
         mov eax, [esp]
-        push dword [eax+14h*4] ; efftype
+        push dword [eax+shok_EGL_CEffectOOEffectType] ; efftype
         push ebx
         call shok_lua_pushint
         
         mov eax, [esp]
-        fld dword [eax+22h*4] ; sx
+        fld dword [eax+shok_EGL_CEffectOOEffectSX] ; sx
         call luaPushFloat
         
         mov eax, [esp]
-        fld dword [eax+23h*4] ; sy
+        fld dword [eax+shok_EGL_CEffectOOEffectSY] ; sy
         call luaPushFloat
         
         mov eax, [esp]
-        fld dword [eax+26h*4] ; tx
+        fld dword [eax+shok_EGL_CEffectOOEffectTX] ; tx
         call luaPushFloat
         
         mov eax, [esp]
-        fld dword [eax+27h*4] ; ty
+        fld dword [eax+shok_EGL_CEffectOOEffectTY] ; ty
         call luaPushFloat
         
         mov eax, [esp]
-        push dword [eax+2Fh*4] ; attacker id
+        push dword [eax+shok_EGL_CEffectOOEffectAttID] ; attacker id
         push ebx
         call shok_lua_pushint
         
@@ -455,16 +432,16 @@ globalHitCallbackCannonBall:
         call shok_lua_pushint
         
         mov eax, [esp]
-        push dword [eax+32h*4] ; damage
+        push dword [eax+shok_GGL_CCannonBallEffectOOEffectDamage] ; damage
         push ebx
         call shok_lua_pushint
         
         mov eax, [esp]
-        fld dword [eax+33h*4] ; aoe range
+        fld dword [eax+shok_GGL_CCannonBallEffectOOAoERange] ; aoe range
         call luaPushFloat
         
         mov eax, [esp]
-        push dword [eax+17h*4] ; effect id
+        push dword [eax+shok_EGL_CEffectOOEffectID] ; effect id
         push ebx
         call shok_lua_pushint
         
@@ -482,12 +459,12 @@ globalHitCallbackCannonBall:
         
 .return:
         popad
-        push 4FF476h ; jump back
+        push shok_GGL_CCannonBallEffect_HitCallback ; jump back
         ret
 
 setGlobalHitCbHook:
-        mov dword [778E24h+24h], globalHitCallbackArrow ; patch vtable
-        mov dword [777690h+24h], globalHitCallbackCannonBall
+        mov dword [shok_GGL_CArrowEffectVt+shok_EGL_CFlyingEffectVtOHitCallback], globalHitCallbackArrow ; patch vtable
+        mov dword [shok_GGL_CCannonBallEffectVt+shok_EGL_CFlyingEffectVtOHitCallback], globalHitCallbackCannonBall
         ret
         
 
@@ -506,8 +483,8 @@ setGlobalHitCb:
         ret
 
 removeGlobalHitCbHook:
-        mov dword [778E24h+24h], 511336h ; unpatch vtable
-        mov dword [777690h+24h], 4FF476h
+        mov dword [shok_GGL_CArrowEffectVt+shok_EGL_CFlyingEffectVtOHitCallback], shok_GGL_CArrowEffect_HitCallback ; unpatch vtable
+        mov dword [shok_GGL_CCannonBallEffectVt+shok_EGL_CFlyingEffectVtOHitCallback], shok_GGL_CCannonBallEffect_HitCallback
         ret
 
 removeGlobalHitCb:
@@ -643,12 +620,12 @@ setEffectCreatedCb:
         add esp, 8
         
         ; patch vtable
-        mov dword ecx, [895DACh]
+        mov dword ecx, [shok_createprojectileVTP]
         mov dword eax, [ecx]
         
-        mov ecx, [eax+05Ch]
+        mov ecx, [eax+shok_createprojectileVtO]
         mov dword [globalEffectCreatedCbOriginal], ecx
-        mov dword [eax+05Ch], effectCreatedOverride
+        mov dword [eax+shok_createprojectileVtO], effectCreatedOverride
         
         popad
         mov eax, 0
@@ -669,11 +646,11 @@ removeEffectCreatedCb:
         
         mov dword [globalEffectCreatedCbLuaFunc], 0 ; unpatch vtable
         
-        mov dword ecx, [895DACh]
+        mov dword ecx, [shok_createprojectileVTP]
         mov dword eax, [ecx]
         
         mov ecx, [globalEffectCreatedCbOriginal]
-        mov dword [eax+05Ch], ecx
+        mov dword [eax+effectCreatedOverride], ecx
         
         
         

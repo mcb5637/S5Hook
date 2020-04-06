@@ -15,14 +15,14 @@ reloadCutscenes:
         jmp .reload
         
 .defaultDir:
-        push 779FFCh            ; ptr to "Maps\ExternalMap"
+        push shok_str_mapsexternalmap            ; ptr to "Maps\ExternalMap"
         
 .reload:
-        mov dword eax, [0A0344Ch]
+        mov dword eax, [shok_reloadCutsceneObj]
         mov ecx, [eax]
         mov eax, [ecx]
     
-        call [eax+0Ch]          ; 2nd arg in ecx
+        call [eax+shok_reloadCutsceneVtOReload]          ; 2nd arg in ecx
         
         xor eax, eax
         retn

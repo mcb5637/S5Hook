@@ -4,11 +4,11 @@ section luaTable
 
 section code
 reloadEntities:
-        mov eax, [84EF60h]      ; [[[84ef60]+258]+0C]
-        mov eax, [eax+258h]
-        mov eax, [eax+0Ch]
+        mov eax, [shok_ReloadEntitiesPtr]      ; [[[84ef60]+258]+0C]
+        mov eax, [eax+shok_ReloadEntitiesO1]
+        mov eax, [eax+shok_ReloadEntitiesO2]
         push eax
-        call 5B9A97h
+        call shok_ReloadEntitiesFunc
         
         xor eax, eax
         retn

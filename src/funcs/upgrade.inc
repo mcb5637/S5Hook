@@ -18,21 +18,21 @@ addBuildingUpgrade:
         
         ;ref: 4BC18D & 4CA751
         
-        mov ecx, [85A3A0h]  ; CGLGameLogic
-        mov ecx, [ecx+40]
+        mov ecx, [shok_CGLGameLogicOP]  ; CGLGameLogic
+        mov ecx, [ecx+shok_CGLGameLogicOO1]
         push 1              ; playerId
-        call 4A91BCh        ; getCPlayerStatus(this, playerId)
-        mov ecx, [eax+792]  ; CBuildingUpgradeManager
+        call shok_CGLGameLogic_getPlayerStatus        ; getCPlayerStatus(this, playerId)
+        mov ecx, [eax+shok_playerstatusOOCBuildingUpgradeManager]  ; CBuildingUpgradeManager
         mov edi, ecx
         
-        call 4B3D42h        ; CBuildingUpgradeManager::add(this, catId, firstBuilding)
+        call shok_CBuildingUpgradeManagerAdd        ; CBuildingUpgradeManager::add(this, catId, firstBuilding)
         
-        lea ecx, [edi+20h] 
+        lea ecx, [edi+shok_CBuildingUpgradeManagerOO] 
         push esi
         push esp
-        call 4CA5A2h        ; obj = getObj(this (mgr + 32), &catId_);
-        mov dword [eax], 1  ; num scholars
-        mov dword [eax+4], 0
+        call shok_CBuildingUpgradeManagerGetObj        ; obj = getObj(this (mgr + 32), &catId_);
+        mov dword [eax+shok_CBuildingUpgradeManagerGetObjOOScholars], 1  ; num scholars
+        mov dword [eax+shok_CBuildingUpgradeManagerGetObjOO0], 0
         pop eax
         
         popad

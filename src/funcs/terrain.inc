@@ -7,8 +7,8 @@ section code
 
 toTerrainCoords:          ; ebx = L, ebp = {float[2],int[2]}, ret = Zflag
         
-        mov eax, [895DACh]  ; CGLEGameLogic global instance
-        mov esi, [eax+4*9]  ; CGLELandscape
+        mov eax, [shok_CGLEGameLogicObj]  ; CGLEGameLogic global instance
+        mov esi, [eax+shok_CGLELandscapeOO]  ; CGLELandscape
         
         push 1
         push ebx
@@ -22,12 +22,12 @@ toTerrainCoords:          ; ebx = L, ebp = {float[2],int[2]}, ret = Zflag
         
         lea ecx, [ebp + 8]
         push ebp
-        call 585C21h        ; converts floatXY to terrain grid coordinates
+        call shok_floatXYToTerrainGrid        ; converts floatXY to terrain grid coordinates
         
         push dword [ebp+12]
         push dword [ebp+8]
         mov ecx, [esi+4]
-        call 449D52h
+        call shok_toTerrainCoordMysteriousFunc
         test eax, eax       ; valid coords?
         
         retn
@@ -45,14 +45,14 @@ getTerrainInfo:
         jz .abort
         
         ;esi is set in toTerrainCoords ;)
-        mov ecx, [esi+28]   ; CGLETerrainHiRes
+        mov ecx, [esi+shok_CGLELandscapeOOCGLETerrainHiRes]   ; CGLETerrainHiRes
         
         mov eax, [ebp+12]   ; y
         inc eax
-        imul eax, [ecx+28]  ; (y+1)*terrWidth
+        imul eax, [ecx+shok_CGLETerrainHiResOOWidth]  ; (y+1)*terrWidth
         add eax, [ebp+8]    ; (y+1)*terrWidth + x
         
-        mov edx, [ecx + 8]  ; terrain height table
+        mov edx, [ecx + shok_CGLETerrainHiResOOHeightTab]  ; terrain height table
         lea eax, [edx + 2*eax + 2]
         movzx eax, word [eax]
         
@@ -60,12 +60,12 @@ getTerrainInfo:
         push ebx
         call shok_lua_pushint
         
-        mov eax, [8581ECh]  ; CGlobalsLogicEx global instance
-        mov eax, [eax+24]
-        mov ecx, [eax+4]    ; blocking table
+        mov eax, [shok_CGlobalsLogicExObj]  ; CGlobalsLogicEx global instance
+        mov eax, [eax+shok_CGlobalsLogicExOff1]
+        mov ecx, [eax+shok_CGlobalsLogicExOff2]    ; blocking table
         
         mov eax, [ebp+12]   ; y
-        imul eax, [898B74h] ; y*global map size
+        imul eax, [shok_GlobalMapSize] ; y*global map size
         add eax, [ebp+8]    ; y*ms + x
         movzx eax, byte [ecx + eax]
         
@@ -85,9 +85,9 @@ getTerrainInfo:
         ; terraintype
         push esi
         
-        mov eax, [895DACh] ;GameLogic_Instance_895DAC
-        mov eax, [eax+24h]
-        mov esi, [eax+20h] ;CGLETerrainLowRes
+        mov eax, [shok_CGLEGameLogicObj] ;GameLogic_Instance_895DAC
+        mov eax, [eax+shok_CGLEGameLogicOOCGLETerrainLowRes]
+        mov esi, [eax+shok_CGLEGameLogicOOCGLETerrainLowRes2] ;CGLETerrainLowRes
         
         mov ecx, 4
         
@@ -102,12 +102,12 @@ getTerrainInfo:
         mov edx, eax
         
         inc edx                 ;(y+1)
-        imul edx, [esi+2Ch]     ;(y+1)*len
+        imul edx, [esi+shok_CGLEGameLogicOOCGLETerrainLowResOOLen]     ;(y+1)*len
         pop eax
         add edx, eax            ;x+(y+1)*len
         imul edx, 4
         
-        mov ecx, [esi+8]        ;base
+        mov ecx, [esi+shok_CGLEGameLogicOOCGLETerrainLowResOOBase]        ;base
         add ecx, 4 
         add ecx, edx 
         
