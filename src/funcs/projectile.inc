@@ -650,7 +650,7 @@ removeEffectCreatedCb:
         mov dword eax, [ecx]
         
         mov ecx, [globalEffectCreatedCbOriginal]
-        mov dword [eax+effectCreatedOverride], ecx
+        mov dword [eax+shok_createprojectileVtO], ecx
         
         
         
