@@ -8,19 +8,20 @@ section autorun
 section code
 
 eiPredFuncs:
-        tableEntry createCirclePredicate,       "InCircle"          ; x, y, r
-        tableEntry createRectPredicate,         "InRect"            ; x0, y0, x1, y1
-        tableEntry createPlayerPredicate,       "OfPlayer"          ; pID
-        tableEntry createTypePredicate,         "OfType"            ; eTypeID
-        tableEntry createCatPredicate,          "OfCategory"        ; entCatID
-        tableEntry createUpCatPredicate,        "OfUpgradeCategory" ; upCatID
-        tableEntry createBuildingPredicate,     "IsBuilding"        ; -
-        tableEntry createSectorPredicate,       "InSector"          ; sectorID
-		tableEntry createPlayerNotZeroPredicate,"NotOfPlayer0"		; -
-		tableEntry createMultiPlayerPredicate,	"OfAnyPlayer"		; player1, player2, ...
-		tableEntry createMultiEtypPredicate,	"OfAnyType"		    ; etyp1, etyp2, ...
-		tableEntry createRProviderPredicate,	"ProvidesResource"	; resourceType (raw)
-        tableEntry createIsSettlerPredicate,    "IsSettler"         ; -
+        tableEntry createCirclePredicate,               "InCircle"          ; x, y, r
+        tableEntry createRectPredicate,                 "InRect"            ; x0, y0, x1, y1
+        tableEntry createPlayerPredicate,               "OfPlayer"          ; pID
+        tableEntry createTypePredicate,                 "OfType"            ; eTypeID
+        tableEntry createCatPredicate,                  "OfCategory"        ; entCatID
+        tableEntry createUpCatPredicate,                "OfUpgradeCategory" ; upCatID
+        tableEntry createBuildingPredicate,             "IsBuilding"        ; -
+        tableEntry createSectorPredicate,               "InSector"          ; sectorID
+		tableEntry createPlayerNotZeroPredicate,        "NotOfPlayer0"		; -
+		tableEntry createMultiPlayerPredicate,	        "OfAnyPlayer"		; player1, player2, ...
+		tableEntry createMultiEtypPredicate,	        "OfAnyType"		    ; etyp1, etyp2, ...
+		tableEntry createRProviderPredicate,	        "ProvidesResource"	; resourceType (raw)
+        tableEntry createIsSettlerPredicate,            "IsSettler"         ; -
+        tableEntry createIsNotSolderPredicate,          "IsNotSoldier"      ; -
 ; ideas: luaFnPredicate (prob slower than lua implementation)
         dd 0
         
@@ -636,13 +637,13 @@ createIsSettlerPredicate:
         
         mov [esi], esi									; pointer to own adress -> object is own vtable
 		
-		mov [esi+4], dword playerIsSettlerPredicateFunc	; func at +4
+		mov [esi+4], dword isSettlerPredicateFunc	; func at +4
         
         popad
         mov eax, 1
         retn
 
-playerIsSettlerPredicateFunc:		; ecx -> arg0 this (not used)
+isSettlerPredicateFunc:		; ecx -> arg0 this (not used)
 		pushad
 		
 		mov ebx, [esp+24h] ; arg1 -> pointer to entity object
@@ -652,6 +653,52 @@ playerIsSettlerPredicateFunc:		; ecx -> arg0 this (not used)
         test eax, eax
 		jnz .rtrue
 		
+        add esp, 4
+		popad
+		mov eax, 0
+		retn 4
+		
+.rtrue:
+        add esp, 4
+		popad
+		mov eax, 1
+		retn 4
+
+createIsNotSolderPredicate:
+		pushad
+        
+        push 8
+        push ebx
+        call [lua_newuserdata]
+        mov esi, eax
+        add esp, 8
+        
+        mov [esi], esi									; pointer to own adress -> object is own vtable
+		
+		mov [esi+4], dword isNotSolderPredicateFunc	; func at +4
+        
+        popad
+        mov eax, 1
+        retn
+
+isNotSolderPredicateFunc:		; ecx -> arg0 this (not used)
+		pushad
+		
+		mov ebx, [esp+24h] ; arg1 -> pointer to entity object
+		
+		push ebx
+        call shok_IsSettler
+        test eax, eax
+		jz .rtrue
+        
+        mov eax, [ebx + 1FCh] ; leader id
+        test eax, eax
+        jz .rfalse
+        mov ebx, [ebx + 8] ; own id
+        cmp eax, ebx
+        je .rtrue
+		
+.rfalse:
         add esp, 4
 		popad
 		mov eax, 0

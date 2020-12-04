@@ -4,6 +4,7 @@ section luaTable
         tableEntry daReallocMem,        "ReAllocMem"
         tableEntry daFreeMem,           "FreeMem"
         tableEntry setHighFPUPrecision, "SetPreciseFPU"
+        tableEntry getThreadID,         "GetCurrentThreadID"
 
 section autorun
         call daSetupFuncs
@@ -344,4 +345,18 @@ daFreeMem:
         
         popad
         xor eax, eax
+        retn
+
+
+getThreadID:
+        pushad
+        
+        call [WinAPIGetCurrentThreadID]
+        mov ebx, [esp+24h]
+        push eax
+        push ebx
+        call shok_lua_pushint
+        
+        popad
+        mov eax, 1
         retn
