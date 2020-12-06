@@ -94,6 +94,7 @@ shok_teleportentity             equ 57BC78h     ; thiscall (<ecx> this, float po
 shok_logicMoveSettler           equ 4D8B01h     ; cdecl luaapi
 
 shok_IsSettler                  equ 4A2B62h     ; cdecl (ep) -> ep
+shok_IsBuilding                 equ 449432h     ; cdecl (ep) -> ep
 
 
 shok_CProjectileEffectCreator   equ 774698h

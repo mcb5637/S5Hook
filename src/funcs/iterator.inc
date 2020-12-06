@@ -22,6 +22,7 @@ eiPredFuncs:
 		tableEntry createRProviderPredicate,	        "ProvidesResource"	; resourceType (raw)
         tableEntry createIsSettlerPredicate,            "IsSettler"         ; -
         tableEntry createIsNotSolderPredicate,          "IsNotSoldier"      ; -
+        tableEntry createIsSettlerOrBuildingPredicate,  "IsSettlerOrBuilding"
 ; ideas: luaFnPredicate (prob slower than lua implementation)
         dd 0
         
@@ -710,3 +711,46 @@ isNotSolderPredicateFunc:		; ecx -> arg0 this (not used)
 		mov eax, 1
 		retn 4
 
+
+createIsSettlerOrBuildingPredicate:
+		pushad
+        
+        push 8
+        push ebx
+        call [lua_newuserdata]
+        mov esi, eax
+        add esp, 8
+        
+        mov [esi], esi									; pointer to own adress -> object is own vtable
+		
+		mov [esi+4], dword isSettlerOrBuildingPredicateFunc	; func at +4
+        
+        popad
+        mov eax, 1
+        retn
+
+isSettlerOrBuildingPredicateFunc:		; ecx -> arg0 this (not used)
+		pushad
+		
+		mov ebx, [esp+24h] ; arg1 -> pointer to entity object
+		
+		push ebx
+        call shok_IsSettler
+        test eax, eax
+		jnz .rtrue
+		
+        ; arg already pushed
+        call shok_IsBuilding
+        test eax, eax
+		jnz .rtrue
+		
+        add esp, 4
+		popad
+		mov eax, 0
+		retn 4
+		
+.rtrue:
+        add esp, 4
+		popad
+		mov eax, 1
+		retn 4

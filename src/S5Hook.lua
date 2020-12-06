@@ -146,6 +146,7 @@
                 Predicate.OfAnyPlayer(player1, player2, ...)            Matches entities of any of the specified players
                 Predicate.OfAnyType(etyp1, etyp2, ...)                  Matches entities with any of the specified entity types
                 Predicate.IsNotSoldier()                                Matches entities that are not soldiers (checked by their leader id)
+                Predicate.IsSettlerOrBuilding()                         Matches entities that are settlers or buildings (filters out trees and stones and similar stuff)
                 Predicate.ProvidesResource(resourceType)                Matches entities, where serfs can extract the specified resource. Use ResourceType.XXXRaw
                                                                         Notes: Use the iterator version if possible, it's usually faster for doing operations on every match.
                                                                                The Tableize version is just faster if you want to create a table and save it for later.
